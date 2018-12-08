@@ -36,6 +36,7 @@ public:
     void add(char* aKey, double aValue);
     void add(char *aKey, float aValue);
     void add(char* aKey, int aValue);
+	void add(char* aKey, bool aValue);
 	void add(char* aKey, char *aValue);
 
     void finnish(); ///< prepare meassege to be transmited.

@@ -65,25 +65,97 @@ void Message::add(char *aKey, float aValue)
         temp[i] = pair[k++];
     mMessageSize += (keySize+6);
     free(mMessage);
+	free(pair);
     mMessage = temp;
     temp = NULL;
+	pair = NULL;
 }
 
 
 void Message::add(char* aKey, int aValue)
 {
+	size_t keySize = strlen(aKey);
+	unsigned char* pair = (unsigned char*)malloc(keySize+6);
+	memcpy(pair, aKey, keySize);
 
+	pair[keySize+1] = ':';
+	pair[keySize+2] = 'i';
+
+	unsigned char bytes[4];
+	memcpy(bytes, (unsigned char*)&aValue, 4);
+
+	pair[keySize+3] = bytes[0];
+	pair[keySize+4] = bytes[1];
+	pair[keySize+5] = bytes[2];
+	pair[keySize+6] = bytes[3];
+
+	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+6);
+	memcpy(temp+(mMessageSize+1), pair, keySize+6);
+	
+	free(mMessage);
+	free(pair);
+	mMessage = temp;
+	temp = NULL;		
+	pair = NULL;
 }
+
+/**
+	the value is encoded to bX where x is 0 or 1
+**/
+void Message::add(char* aKey, bool aValue)
+{
+	size_t keySize = strlen(aKey);
+	unsigned char* pair = (unsigned char*)malloc(keySize+3);
+	memcpy(pair, aKey, keySize);
+
+	pair[keySize+1] = ':';
+	pair[keySize+2] = 'b';
+	pair[keySize+3] = (aValue) ? '1' : '0';
+
+	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+3);
+	memcpy(temp, mMessage, mMessageSize);
+	memcpy(temp+(mMessageSize+1), pair, keySize+3);
+
+	free(mMessage);
+	free(pair);
+	mMessage = temp;
+	temp = NULL;
+	pair = NULL;
+}
+
 
 /** \brief Add key value to message,
 
-	the value is marked with prefix cXX, wher XX is an 2 digit integer that
+	the value is marked with prefix cXX, wher XX is binary short that
 	tells the size of the value text.
 
 **/
 void Message::add(char* aKey, char *aValue)
 {
+    size_t keySize = strlen(aKey);
+    size_t valueSize = strlen(aValue);
 
+    char *pair = (char*)malloc(keySize+valueSize+4);
+    memcpy(pair, aKey, keySize);
+    pair[keySize+1] = ':';
+	pair[keySize+2] = 'c';
+	short size = (short) valueSize;
+	unsigned char bufferSize[2];
+	memcpy(bufferSize, (unsigned char*)size, 2);
+	pair[keySize+3] = bufferSize[0];
+	pair[keySize+4] = bufferSize[1];
+
+	memcpy(pair+keySize+4, aValue, valueSize);
+
+	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+valueSize+4);
+	memcpy(temp, mMessage, mMessageSize);
+	memcpy(temp+mMessageSize+1, (unsigned char*)pair, keySize+valueSize+4);
+	free(mMessage);
+	free(pair);
+	pair = NULL;
+	mMessage = NULL;
+	mMessage = temp;
+	mMessageSize += (keySize+valueSize+4); 
 }
 
 void Message::finnish()
