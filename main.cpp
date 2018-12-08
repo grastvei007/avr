@@ -2,6 +2,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "message.h"
+#include "messagehandler.h"
 #include <stdlib.h>
 
 #define F_CPU 12000000UL
@@ -14,7 +15,7 @@ void USART_send( unsigned char data);
 void USART_putstring(char* StringPtr);
 void USART_putMessage(unsigned char *aMsg, int size);
 
-
+MessageHandler handler;
 
 int main()
 {
