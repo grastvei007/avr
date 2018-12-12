@@ -141,7 +141,7 @@ void Message::add(char* aKey, char *aValue)
 	pair[keySize+2] = 'c';
 	short size = (short) valueSize;
 	unsigned char bufferSize[2];
-	memcpy(bufferSize, (unsigned char*)size, 2);
+	memcpy(bufferSize, (unsigned char*)&size, 2);
 	pair[keySize+3] = bufferSize[0];
 	pair[keySize+4] = bufferSize[1];
 

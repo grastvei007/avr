@@ -31,8 +31,11 @@ class MessageHandler
 		size_t bufferSize() const; ///< return the buffer size.
 		size_t size() const; ///< return the size of chars current in the buffer.
 
+		//debug
+		void printBuffer() const;
+
 	private:
-		bool hasMessage();
+		bool hasMessage() const;
 	private:
 		unsigned char* mBuffer;
 		size_t mBufferSize;

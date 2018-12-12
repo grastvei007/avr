@@ -1,6 +1,7 @@
 #include "messagehandler.h"
 
 #include <stdlib.h>
+#include <cstdio>
 
 MessageHandler::MessageHandler(size_t aBufferSize) :
 	mBufferStart(0),
@@ -9,6 +10,10 @@ MessageHandler::MessageHandler(size_t aBufferSize) :
 {
 	mBuffer = (unsigned char*)malloc(aBufferSize);
 	mCallback = NULL;
+	for(int i=0; i<mBufferSize; ++i)
+	{
+		mBuffer[i] = '0';
+	}
 }
 
 
@@ -32,7 +37,7 @@ void MessageHandler::insertChar(unsigned char c)
  		mBufferEnd = 0;
 
 
-	if(mBuffeEnd >= mBufferStart)
+	if(mBufferEnd >= mBufferStart)
 		mBufferStart++;
 
 	if(mBufferStart >= mBufferSize)
@@ -40,7 +45,7 @@ void MessageHandler::insertChar(unsigned char c)
 }
 
 
-void MessageHandler::hasMessage()
+bool MessageHandler::hasMessage() const
 {
 
 
@@ -68,3 +73,11 @@ size_t MessageHandler::size() const
 	
 }
 
+
+void MessageHandler::printBuffer() const
+{
+	for(int i=0; i<bufferSize(); ++i)
+	{
+		printf("%c", mBuffer[i]);
+	}
+}
