@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <cstdio>
+#include <string.h>
 
 MessageHandler::MessageHandler(size_t aBufferSize) :
 	mBufferStart(0),
@@ -37,7 +38,7 @@ void MessageHandler::insertChar(unsigned char c)
  		mBufferEnd = 0;
 
 
-	if(mBufferEnd >= mBufferStart)
+	if(mBufferEnd == mBufferStart)
 		mBufferStart++;
 
 	if(mBufferStart >= mBufferSize)
@@ -78,6 +79,60 @@ void MessageHandler::printBuffer() const
 {
 	for(int i=0; i<bufferSize(); ++i)
 	{
-		printf("%c", mBuffer[i]);
+		printf("%c ", mBuffer[i]);
 	}
+}
+
+unsigned char MessageHandler::getChar(unsigned int aIdx)
+{
+	int pos = (mBufferStart + aIdx) % mBufferSize;
+	return mBuffer[pos];
+}
+
+
+int MessageHandler::find(char *aStr)
+{
+	int len = strlen(aStr);
+	if(size() < len)
+		return -1;
+
+	if(len == 0)
+		return -1;
+
+	int k = 0;
+	for(int i=0; i<size(); i++)
+	{
+		int pos = (i + mBufferStart) % mBufferSize;
+		if(mBuffer[pos] == aStr[0])
+		{
+			printf("%s\n", "first-c");
+			int p = pos+1;
+			for(int j=1; j<len; j++)
+			{			
+				printf("%c\n", mBuffer[p]);	
+				if(p > mBufferSize)
+					p = 0;
+					
+				if(mBuffer[p] == aStr[j])
+				{
+					k++;
+					p++;
+				}
+				else
+				{
+					k=0;
+					break;
+				}
+			}
+			if(k != 0)
+			{
+				printf("%s %i\n", "found start,", mBufferStart);
+				int posInArray = i;
+				if(mCallback)
+					mCallback(NULL);
+				return (mBufferStart + posInArray) % mBufferSize;
+			}
+		}
+	}
+	return -1;
 }

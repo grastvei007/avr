@@ -26,6 +26,8 @@ class MessageHandler
 
 		void setCallback(funcPtr func);
 
+		int find(char *aStr);
+		unsigned char getChar(unsigned int aOdx);		
 
 		//get
 		size_t bufferSize() const; ///< return the buffer size.
