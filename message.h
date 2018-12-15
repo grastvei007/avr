@@ -19,6 +19,9 @@ public:
     Message();
     Message(unsigned char *aMsg);
 
+	void init();
+	void destroy(); ///< free message buffer.
+
     /**
      * @brief isValid
      *
@@ -42,6 +45,10 @@ public:
     void finnish(); ///< prepare meassege to be transmited.
 
     int getMessage(unsigned char *&rMessage); ///< get the message
+	/** brief Direct set the message buffer,
+		@warning replaces existing message if it exist.
+	**/
+	void setMessage(unsigned char *aMsg, size_t aMessageSize);
 private:
     void calcCheckcode();
     int validateMessage(const unsigned char *aMsg);

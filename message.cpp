@@ -3,20 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-Message::Message() :
-    mIsValid(true)
+Message::Message()
 {
-    mMessageSize = 8;
-    mMessage = (unsigned char*)malloc(mMessageSize); // new unsigned char[mMessageSize];
-    mMessage[0] = '<';
-    mMessage[1] = 'm';
-    mMessage[2] = 's';
-    mMessage[3] = 'g';
-    mMessage[4] = '0';
-    mMessage[5] = '0';
-    mMessage[6] = '0';
-    mMessage[7] = '0'; // with place for 4 byte int value in plain text.
-
+	init();
 }
 
 
@@ -25,6 +14,33 @@ Message::Message(unsigned char *aMsg)
     mIsValid = validateMessage(aMsg);
 }
 
+
+void Message::init()
+{
+    mIsValid = true;
+    mMessageSize = 8;
+    mMessage = (unsigned char*)malloc(mMessageSize); // new unsigned char[mMessageSize];
+    mMessage[0] = '<';
+    mMessage[1] = 'm';
+    mMessage[2] = 's';
+    mMessage[3] = 'g';
+    mMessage[4] = '0';
+    mMessage[5] = '0';
+    mMessage[6] = '0'; 
+    mMessage[7] = '0'; // with place for 4 byte int value in plain text.
+
+
+}
+
+
+void Message::destroy()
+{
+	if(mMessage)
+	{
+		free(mMessage);
+		mMessage = NULL;
+	}
+}
 
 int Message::isValid()
 {
@@ -199,6 +215,16 @@ int Message::getMessage(unsigned char *&rMessage)
     rMessage = (unsigned char*) malloc(mMessageSize);
     memcpy(rMessage, mMessage, mMessageSize);
     return mMessageSize;
+}
+
+
+void Message::setMessage(unsigned char *aMessage, size_t aMessageSize)
+{
+	if(mMessage)
+		free(mMessage);
+
+	mMessage = (unsigned char*)malloc(aMessageSize);
+	memcpy(mMessage, aMessage, aMessageSize);
 }
 
 

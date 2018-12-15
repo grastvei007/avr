@@ -1,5 +1,10 @@
 #include "adc.h"
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+#include <stdlib.h>
 
 Adc::Adc()
 {
@@ -67,7 +72,7 @@ ISR(ADC_vect)
         case 0x40 :
 			if(ready > 0)
 			{
-	            value_adc0 = scale;
+//	            value_adc0 = scale;
     	        ADMUX = 0x41;
 				ready = 0;
 			}
@@ -78,7 +83,7 @@ ISR(ADC_vect)
         case 0x41 :
 			if(ready > 0)
 			{
-            	value_adc1 = scale;
+  //          	value_adc1 = scale;
             	ADMUX = 0x42;
 				ready = 0;
 			}
@@ -89,7 +94,7 @@ ISR(ADC_vect)
         case 0x42 :
 			if(ready > 0)
 			{
-            	value_adc2 = scale;
+    //        	value_adc2 = scale;
             	ADMUX = 0x40;
 				ready = 0;
 			}

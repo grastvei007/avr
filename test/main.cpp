@@ -1,6 +1,8 @@
 #include "../messagehandler.h"
+#include "../message.h"
 
 #include <iostream>
+#include <string>
 
 void callback(Message *aMsg)
 {
@@ -12,9 +14,9 @@ void callback(Message *aMsg)
 int main(int argc, char *argv[])
 {
 
-	MessageHandler *msg = new MessageHandler(10);
+	MessageHandler *msg = new MessageHandler(30);
 	msg->setCallback(callback);
-	for(int i=0; i< 15; ++i)
+	for(int i=0; i< 55; ++i)
 	{
 		msg->printBuffer();
 		msg->insertChar(77+i);
@@ -34,6 +36,22 @@ int main(int argc, char *argv[])
 
 	int pos = msg->find("msg");
 	std::cout << pos << std::endl;
+
+	std::string str = "<msg0019key:f33SAn>";
+
+	for(int i=0; i<str.size(); ++i)
+	{
+		msg->insertChar(str.at(i));
+	}
+
+/*	Message msg2;
+	msg2.init();
+	float val = 13.2;
+	msg2.add("key", val);
+	msg2.finnish();
+	unsigned char *m;
+	msg2.getMessage(m);
+	std::cout << m << std::endl;*/
 
 	return 0;
 }

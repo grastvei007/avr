@@ -32,6 +32,7 @@ class MessageHandler
 		//get
 		size_t bufferSize() const; ///< return the buffer size.
 		size_t size() const; ///< return the size of chars current in the buffer.
+		int getMessage(Message *&rMsg, int aStartPosInBuffer);
 
 		//debug
 		void printBuffer() const;
