@@ -9,7 +9,7 @@ INCLUDE  :=
 SRC      := main.cpp 
 
 OBJECTS := main.cpp \
-			../messagehandler.cpp ../message.cpp
+			../messagehandler.cpp ../message.cpp ../messagetranslationsenter.cpp
 # $(OBJ_DIR)/main.o
 
 all: build $(APP_DIR)/$(TARGET)

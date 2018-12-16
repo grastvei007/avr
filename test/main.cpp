@@ -1,27 +1,40 @@
 #include "../messagehandler.h"
 #include "../message.h"
+#include "../messagetranslationsenter.h"
 
 #include <iostream>
 #include <string>
 
-void callback(Message *aMsg)
-{
-	std::cout << "Callback" << std::endl;
+MessageTranslationSenter mts;
 
+
+void callback(Message *&aMsg)
+{
+	std::cout << "Callback ";
+	aMsg->print();
+	mts.translateMessage(aMsg);
+//	aMsg.destroy();
 }
 
 
+void keyValueFloat(unsigned char *key, float val)
+{
+	std::cout << key << " - " << val << std::endl; 
+}
+
 int main(int argc, char *argv[])
 {
+	mts.init();
+	mts.setCallbackFloatValue(keyValueFloat);
 
 	MessageHandler *msg = new MessageHandler(30);
 	msg->setCallback(callback);
 	for(int i=0; i< 55; ++i)
 	{
-		msg->printBuffer();
+//		msg->printBuffer();
 		msg->insertChar(77+i);
 
-		std::cout << "    " << msg->size()  <<  "\n";
+//		std::cout << "    " << msg->size()  <<  "\n";
 	}
 	std::cout << "\n";
 
@@ -34,8 +47,8 @@ int main(int argc, char *argv[])
 	msg->printBuffer();
 	std::cout << std::endl;
 
-	int pos = msg->find("msg");
-	std::cout << pos << std::endl;
+//	int pos = msg->find("msg");
+//	std::cout << pos << std::endl;
 
 	std::string str = "<msg0019key:f33SAn>";
 
@@ -43,7 +56,9 @@ int main(int argc, char *argv[])
 	{
 		msg->insertChar(str.at(i));
 	}
-
+	msg->printBuffer();
+	std::cout << std::endl;
+//	msg->find("<msg");
 /*	Message msg2;
 	msg2.init();
 	float val = 13.2;

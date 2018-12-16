@@ -44,6 +44,7 @@ void MessageHandler::insertChar(unsigned char c)
 	if(mBufferStart >= mBufferSize)
 		mBufferStart = 0;
 
+
 	int startPos = find("<msg");
 	if( startPos < 0)
 		return;
@@ -91,10 +92,12 @@ size_t MessageHandler::size() const
 
 void MessageHandler::printBuffer() const
 {
+	printf("MessageHandler buffer\n");
 	for(int i=0; i<bufferSize(); ++i)
 	{
-		printf("%c ", mBuffer[i]);
+		printf("%c", mBuffer[i]);
 	}
+	printf("\n");
 }
 
 unsigned char MessageHandler::getChar(unsigned int aIdx)
@@ -112,19 +115,16 @@ int MessageHandler::find(char *aStr)
 
 	if(len == 0)
 		return -1;
-
 	int k = 0;
-	for(int i=0; i<size(); i++)
+	for(int i=0; i<size()+1; i++)
 	{
 		int pos = (i + mBufferStart) % mBufferSize;
 		if(mBuffer[pos] == aStr[0])
 		{
-//			printf("%s\n", "first-c");
-			int p = pos+1;
+			int p = (pos+1);;
 			for(int j=1; j<len; j++)
 			{			
-//				printf("%c\n", mBuffer[p]);	
-				if(p > mBufferSize)
+				if(p > mBufferSize-1)
 					p = 0;
 					
 				if(mBuffer[p] == aStr[j])
@@ -140,10 +140,7 @@ int MessageHandler::find(char *aStr)
 			}
 			if(k != 0)
 			{
-//				printf("%s %i\n", "found start,", mBufferStart);
 				int posInArray = i;
-				if(mCallback)
-					mCallback(NULL);
 				return (mBufferStart + posInArray) % mBufferSize;
 			}
 		}
@@ -156,34 +153,41 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 {
 	rMessage = NULL;
 
+
 	char sizeBuffer[4];
-	sizeBuffer[0] = mBuffer[aStartPosInBuffer+4];
-	sizeBuffer[1] = mBuffer[aStartPosInBuffer+5];
-	sizeBuffer[2] = mBuffer[aStartPosInBuffer+6];
-	sizeBuffer[3] = mBuffer[aStartPosInBuffer+7];
+	sizeBuffer[0] = mBuffer[(aStartPosInBuffer+4)%mBufferSize];
+	sizeBuffer[1] = mBuffer[(aStartPosInBuffer+5)%mBufferSize];
+	sizeBuffer[2] = mBuffer[(aStartPosInBuffer+6)%mBufferSize];
+	sizeBuffer[3] = mBuffer[(aStartPosInBuffer+7)%mBufferSize];
 
 	int size = atoi(sizeBuffer);
+	if(size  <= 10)
+		return -1;
+	
 	unsigned char* msg = (unsigned char*)malloc(size);
-	for(int i=0; i<size; ++i)
-		msg[i] = getChar(aStartPosInBuffer+i);
+	for(int i = 0; i<size; ++i)
+	{
+		msg[i] = mBuffer[(aStartPosInBuffer+i)%mBufferSize];
+	}
 
 	rMessage = (Message*)malloc(sizeof(Message));
 	rMessage->init();
 	rMessage->setMessage(msg, size);
+
 	if(rMessage->isValid() != 1)
 	{
 		rMessage->destroy();
 		free(rMessage);
 		rMessage = NULL;
 	}
-	
-	//message found erase it from buffer.
-	for(int i=0; i<size; ++i)
-	{
-		int pos = (aStartPosInBuffer+i) % mBufferSize;
-		mBuffer[pos] = '0'; // overwrite with something
+	else
+	{	
+		for(int i=0; i<size; ++i)
+		{
+			int pos = (aStartPosInBuffer+i) % mBufferSize;
+			mBuffer[pos] = '0'; // overwrite with something
+		}
 	}
-	
 	free(msg);
 }
 

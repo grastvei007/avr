@@ -12,9 +12,11 @@
 	Handler uart rx, recieved chars are stored in a circular buffer,
 	and automaticaly look for messages within the buffer.
 
+	Set a callback function to get notifications every time a new message is detected.
+
 */
 
-typedef void (*funcPtr)(Message*);
+typedef void (*funcPtr)(Message*&);
 
 class MessageHandler
 {

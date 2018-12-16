@@ -17,7 +17,10 @@ class Message
 {
 public:
     Message();
-    Message(unsigned char *aMsg);
+    Message(unsigned char *aMsg, size_t aSize);
+
+	static const int HeaderSize = 4;
+	static const int MaxKeySize = 20;
 
 	void init();
 	void destroy(); ///< free message buffer.
@@ -48,10 +51,11 @@ public:
 	/** brief Direct set the message buffer,
 		@warning replaces existing message if it exist.
 	**/
-	void setMessage(unsigned char *aMsg, size_t aMessageSize);
+	void setMessage(unsigned char *&aMsg, size_t aMessageSize);
+	void print();
 private:
     void calcCheckcode();
-    int validateMessage(const unsigned char *aMsg);
+    int validateMessage(const unsigned char *aMsg, size_t aSize);
 
 private:
     unsigned char *mMessage;

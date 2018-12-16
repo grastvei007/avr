@@ -9,9 +9,9 @@ Message::Message()
 }
 
 
-Message::Message(unsigned char *aMsg)
+Message::Message(unsigned char *aMsg, size_t aSize)
 {
-    mIsValid = validateMessage(aMsg);
+    mIsValid = validateMessage(aMsg, aSize);
 }
 
 
@@ -218,13 +218,15 @@ int Message::getMessage(unsigned char *&rMessage)
 }
 
 
-void Message::setMessage(unsigned char *aMessage, size_t aMessageSize)
+void Message::setMessage(unsigned char *&aMessage, size_t aMessageSize)
 {
 	if(mMessage)
+	{
 		free(mMessage);
-
-	mMessage = (unsigned char*)malloc(aMessageSize);
-	memcpy(mMessage, aMessage, aMessageSize);
+		mMessage = NULL;
+		mMessageSize = 0;
+	}
+	mIsValid = validateMessage(aMessage, aMessageSize);
 }
 
 
@@ -241,10 +243,10 @@ void Message::calcCheckcode()
 }
 
 
-int Message::validateMessage(const unsigned char *aMsg)
+int Message::validateMessage(const unsigned char *aMsg, size_t aSize)
 {
-    int size = strlen((const char*)aMsg);
-    if(size < 8)
+//	size_t size = strlen((const char*)aMsg);
+    if(aSize < 8)
         return -1;
     if(aMsg[0] != '<' || aMsg[1] != 'm' || aMsg[2] != 's' || aMsg[3] != 'g')
         return -2;
@@ -272,4 +274,15 @@ int Message::validateMessage(const unsigned char *aMsg)
     mMessage = (unsigned char*) malloc(msgSize);
     memcpy(mMessage, aMsg, msgSize);
     return 1;
+}
+
+
+void Message::print()
+{
+	printf("\nMessage size: %i\n", mMessageSize);
+	for(int i=0; i<mMessageSize; ++i)
+	{
+		printf("%c", mMessage[i]);
+	}
+	printf("\nMessage End\n");
 }
