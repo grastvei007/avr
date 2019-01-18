@@ -153,25 +153,28 @@ void Message::add(char* aKey, char *aValue)
 
     char *pair = (char*)malloc(keySize+valueSize+4);
     memcpy(pair, aKey, keySize);
-    pair[keySize+1] = ':';
-	pair[keySize+2] = 'c';
-	short size = (short) valueSize;
-	unsigned char bufferSize[2];
-	memcpy(bufferSize, (unsigned char*)&size, 2);
-	pair[keySize+3] = bufferSize[0];
-	pair[keySize+4] = bufferSize[1];
+    pair[keySize] = ':';
+	pair[keySize+1] = 'c';
+	union shortBytes
+	{
+		unsigned short asShort;
+		unsigned char asByte[2];
+	}sb;
+	sb.asShort = (short) valueSize;
+	pair[keySize+2] = sb.asByte[0];
+	pair[keySize+3] = sb.asByte[1];
 
 	memcpy(pair+keySize+4, aValue, valueSize);
 
-	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+valueSize+4);
+	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+valueSize+3);
 	memcpy(temp, mMessage, mMessageSize);
-	memcpy(temp+mMessageSize+1, (unsigned char*)pair, keySize+valueSize+4);
+	memcpy(temp+mMessageSize, (unsigned char*)pair, keySize+valueSize+3);
 	free(mMessage);
 	free(pair);
 	pair = NULL;
 	mMessage = NULL;
 	mMessage = temp;
-	mMessageSize += (keySize+valueSize+4); 
+	mMessageSize += (keySize+valueSize+3); 
 }
 
 void Message::finnish()

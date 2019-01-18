@@ -4,17 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
-MessageHandler::MessageHandler(size_t aBufferSize) :
-	mBufferStart(0),
-	mBufferEnd(0),
-	mBufferSize(aBufferSize)
+MessageHandler::MessageHandler(size_t aBufferSize)
 {
-	mBuffer = (unsigned char*)malloc(aBufferSize);
-	mCallback = NULL;
-	for(int i=0; i<mBufferSize; ++i)
-	{
-		mBuffer[i] = '0';
-	}
+	init(aBufferSize);
 }
 
 
@@ -23,6 +15,20 @@ MessageHandler::~MessageHandler()
 	free(mBuffer);
 }
 
+
+void MessageHandler::init(size_t aBufferSize)
+{
+	mBufferStart = 0;
+	mBufferEnd = 0;
+	mBufferSize = aBufferSize;
+    mBuffer = (unsigned char*)malloc(aBufferSize);
+    mCallback = NULL;
+    for(int i=0; i<mBufferSize; ++i)
+    {
+        mBuffer[i] = '0';
+    }
+
+}
 
 void MessageHandler::setCallback(funcPtr func)
 {
@@ -44,7 +50,7 @@ void MessageHandler::insertChar(unsigned char c)
 	if(mBufferStart >= mBufferSize)
 		mBufferStart = 0;
 
-
+/*
 	int startPos = find("<msg");
 	if( startPos < 0)
 		return;
@@ -57,7 +63,25 @@ void MessageHandler::insertChar(unsigned char c)
 	if(mCallback)
 		mCallback(msg);
 	else
-		free(msg);
+		free(msg);*/
+}
+
+
+void MessageHandler::run()
+{
+    int startPos = find("<msg");
+    if( startPos < 0)
+        return;
+
+    Message *msg;
+    getMessage(msg, startPos);
+    if(!msg)
+        return;
+
+    if(mCallback)
+        mCallback(msg);
+    else
+        free(msg);
 }
 
 

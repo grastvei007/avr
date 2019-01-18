@@ -23,6 +23,8 @@ class MessageHandler
 	public:
 		MessageHandler(size_t aBufferSize = BUFFER_SIZE);
 		~MessageHandler();
+		void init(size_t aBufferSize=BUFFER_SIZE);
+		void run(); // check if there is a message in buffer to process.
 
 		void insertChar(unsigned char c);
 

@@ -16,6 +16,10 @@ void callback(Message *&aMsg)
 //	aMsg.destroy();
 }
 
+void name()
+{
+	std::cout << std::endl << "name func" << std::endl;
+}
 
 void keyValueFloat(unsigned char *key, float val)
 {
@@ -26,6 +30,7 @@ int main(int argc, char *argv[])
 {
 	mts.init();
 	mts.setCallbackFloatValue(keyValueFloat);
+	mts.setDeviceNameFunc(name);
 
 	MessageHandler *msg = new MessageHandler(30);
 	msg->setCallback(callback);
@@ -50,8 +55,8 @@ int main(int argc, char *argv[])
 //	int pos = msg->find("msg");
 //	std::cout << pos << std::endl;
 
-	std::string str = "<msg0019key:f33SAn>";
-
+//	std::string str = "<msg0019key:f33SAn>";
+    std::string str = "<msg0024deviceName:c00u>";
 	for(int i=0; i<str.size(); ++i)
 	{
 		msg->insertChar(str.at(i));
