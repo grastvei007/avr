@@ -17,7 +17,7 @@ class Message
 {
 public:
     Message();
-    Message(unsigned char *aMsg, size_t aSize);
+    Message(char *aMsg, size_t aSize);
 
 	static const int HeaderSize = 4;
 	static const int MaxKeySize = 20;
@@ -47,18 +47,21 @@ public:
 
     void finnish(); ///< prepare meassege to be transmited.
 
-    int getMessage(unsigned char *&rMessage); ///< get the message
+    int getSize();
+    void getMessageData(char *msg);
+
+    int getMessage( char *&rMessage); ///< get the message
 	/** brief Direct set the message buffer,
 		@warning replaces existing message if it exist.
 	**/
-	void setMessage(unsigned char *&aMsg, size_t aMessageSize);
+    void setMessage( char *&aMsg, size_t aMessageSize);
 	void print();
 private:
     void calcCheckcode();
-    int validateMessage(const unsigned char *aMsg, size_t aSize);
+    int validateMessage(const char *aMsg, size_t aSize);
 
 private:
-    unsigned char *mMessage;
+    char mMessage[100];
     size_t mMessageSize;
     int mIsValid;
 

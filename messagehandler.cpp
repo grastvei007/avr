@@ -21,9 +21,9 @@ void MessageHandler::init(size_t aBufferSize)
 	mBufferStart = 0;
 	mBufferEnd = 0;
 	mBufferSize = aBufferSize;
-    mBuffer = (unsigned char*)malloc(aBufferSize);
+    mBuffer = (char*)malloc(aBufferSize);
     mCallback = NULL;
-    for(int i=0; i<mBufferSize; ++i)
+    for(size_t i=0; i<mBufferSize; ++i)
     {
         mBuffer[i] = '0';
     }
@@ -36,7 +36,7 @@ void MessageHandler::setCallback(funcPtr func)
 }
 
 
-void MessageHandler::insertChar(unsigned char c)
+void MessageHandler::insertChar(char c)
 {
 	
 	mBuffer[mBufferEnd++] = c;
@@ -117,14 +117,14 @@ size_t MessageHandler::size() const
 void MessageHandler::printBuffer() const
 {
 	printf("MessageHandler buffer\n");
-	for(int i=0; i<bufferSize(); ++i)
+        for(size_t i=0; i<bufferSize(); ++i)
 	{
 		printf("%c", mBuffer[i]);
 	}
 	printf("\n");
 }
 
-unsigned char MessageHandler::getChar(unsigned int aIdx)
+char MessageHandler::getChar(int aIdx)
 {
 	int pos = (mBufferStart + aIdx) % mBufferSize;
 	return mBuffer[pos];
@@ -188,7 +188,7 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 	if(size  <= 10)
 		return -1;
 	
-	unsigned char* msg = (unsigned char*)malloc(size);
+	char* msg = (char*)malloc(size);
 	for(int i = 0; i<size; ++i)
 	{
 		msg[i] = mBuffer[(aStartPosInBuffer+i)%mBufferSize];

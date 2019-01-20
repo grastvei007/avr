@@ -3,10 +3,14 @@
 
 #include "message.h"
 
+/** Debug function, can be used for debug over usart.
+**/
+typedef void (*debugFunc)(char*);
 
-typedef void (*funcB)(unsigned char*, bool);
-typedef void (*funcI)(unsigned char*, int);
-typedef void (*funcF)(unsigned char*, float);
+
+typedef void (*funcB)(char*, bool);
+typedef void (*funcI)(char*, int);
+typedef void (*funcF)(char*, float);
 
 /** \brief setup tags this device is listen at.
 	The input tags.
@@ -36,22 +40,25 @@ class MessageTranslationSenter
 		void setCallbackBoolValue(funcB aFunc);
 		void setCallbackIntValue(funcI aFunc);
 		void setCallbackFloatValue(funcF aFunc);
+		void setDebugFunc(debugFunc aFunc);
+
 
 		void setCreateTagsFunc(createTagsFunc aFunc);
 		void setDeviceNameFunc(deviceNameFunc aFunc);
 
 	private:
-		int translateKeyValuePair(unsigned char* aMsg, int aStartPos);
+		int translateKeyValuePair(char* aMsg, int aStartPos);
 
-		bool translateBool(unsigned char *aBool);
-		int translateInt(unsigned char *aInt);
-		float translateFloat(unsigned char *aFloat);
-		short translateShort(unsigned char *aShort);
+		bool translateBool(char *aBool);
+		int translateInt(char *aInt);
+		float translateFloat(char *aFloat);
+		short translateShort(char *aShort);
 
 	private:
 		funcB mCallbackBool;
 		funcI mCallbackInt;
 		funcF mCallbackFloat;
+		debugFunc mDebug; ///< callback function for debuging.
 
 		createTagsFunc mCreateTagsFunc;
 		deviceNameFunc mDeviceNameFunc;

@@ -16,6 +16,7 @@ void MessageTranslationSenter::init()
 	mCallbackFloat = NULL;
 	mDeviceNameFunc = NULL;
 	mCreateTagsFunc = NULL;
+	mDebug = NULL;
 }
 
 
@@ -37,16 +38,24 @@ void MessageTranslationSenter::setCallbackFloatValue(funcF aFunc)
 }
 
 
+void MessageTranslationSenter::setDebugFunc(debugFunc aFunc)
+{
+	mDebug = aFunc;
+}
+
+
 void MessageTranslationSenter::translateMessage(Message *aMsg)
 {
 	if(aMsg == NULL)
 	{
-		fprintf(stderr, "No msg");
+		if(mDebug)
+			mDebug("No msg");
+		//fprintf(stderr, "No msg");
 		return;
 	}
 
-	unsigned char *msg = NULL;
-	int size = aMsg->getMessage(msg);
+	char *msg = NULL;
+    int size = aMsg->getMessage(msg);
 	fprintf(stderr, "s", msg);
 	if(!msg || size < 0)
 		return;
@@ -57,15 +66,17 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 		if( (size-pos) <= 2)
 			break;
 		fprintf(stderr, "translatepair\n");
+		if(mDebug)
+			mDebug("translatePair");
 		pos += translateKeyValuePair(msg, pos);
 	}
 		
 }
 
-int MessageTranslationSenter::translateKeyValuePair(unsigned char *aMsg, int aStartPos)
+int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 {
 	fprintf(stderr, "startpos, %i", aStartPos);
-	unsigned char keyBuffer[Message::MaxKeySize] = {'\0'};
+	char keyBuffer[Message::MaxKeySize] = {'\0'};
 	int steps = 0;
 	int startPosValue = 0;
 
@@ -80,7 +91,7 @@ int MessageTranslationSenter::translateKeyValuePair(unsigned char *aMsg, int aSt
 		keyBuffer[steps++] = aMsg[i];
 	};
 	fprintf(stderr, "key %s", keyBuffer);
-	unsigned char type = aMsg[aStartPos+steps];
+	char type = aMsg[aStartPos+steps];
 	steps++;
 
 
@@ -130,27 +141,27 @@ int MessageTranslationSenter::translateKeyValuePair(unsigned char *aMsg, int aSt
 }
 
 
-bool MessageTranslationSenter::translateBool(unsigned char *aBool)
+bool MessageTranslationSenter::translateBool(char *aBool)
 {
 	return (*aBool == '1') ? true : false;
 }
 
 
-int MessageTranslationSenter::translateInt(unsigned char *aInt)
+int MessageTranslationSenter::translateInt(char *aInt)
 {
 	int r = aInt[0] + (aInt[1] << 8) + (aInt[2] << 16) + (aInt[3] << 24);
 	return r;
 }
 
 
-float MessageTranslationSenter::translateFloat(unsigned char *aFloat)
+float MessageTranslationSenter::translateFloat(char *aFloat)
 {
 	float f = aFloat[0] + (aFloat[1] << 8) + (aFloat[2] << 16) + (aFloat[3] << 24);
 	return f;
 }
 
 
-short MessageTranslationSenter::translateShort(unsigned char *aShort)
+short MessageTranslationSenter::translateShort(char *aShort)
 {
 	short s = aShort[0] + (aShort[1] << 8);
 	return s;

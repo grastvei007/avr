@@ -13,9 +13,9 @@
 void initTimer();
 
 void USART_init(void);
-void USART_send( unsigned char data);
+void USART_send(char data);
 void USART_putstring(char* StringPtr);
-void USART_putMessage(unsigned char *aMsg, int size);
+void USART_putMessage(char *aMsg, int size);
 
 MessageHandler messageHandler;
 MessageTranslationSenter mts;
@@ -39,7 +39,7 @@ void deviceNameRequest()
 	m.init();
 	m.add("deviceName", "Atmega328Uno");
 	m.finnish();
-	unsigned char *msg;
+	char *msg;
 	int size = m.getMessage(msg);
 	m.destroy();
 	USART_putMessage(msg, size);
@@ -56,6 +56,7 @@ int main()
 
 	mts.init();
 	mts.setDeviceNameFunc(deviceNameRequest);
+	mts.setDebugFunc(USART_putstring);
 	lock = false;
 	sei();
 	float val = 10.2;
@@ -109,13 +110,13 @@ void USART_init(){
 ISR(USART_RX_vect)
 {
 //	while(!(UCSR0A&(1<<RXC0))){};
-	unsigned char c = UDR0;
+	char c = UDR0;
 //	USART_send(c);
 	messageHandler.insertChar(c);
 }
 
 
-void USART_send( unsigned char data){
+void USART_send(char data){
 
  while(!(UCSR0A & (1<<UDRE0)));
  UDR0 = data;
@@ -131,7 +132,7 @@ void USART_putstring(char* StringPtr){
 
 }
 
-void USART_putMessage(unsigned char *aMsg, int size)
+void USART_putMessage(char *aMsg, int size)
 {
 	for(int i=0; i<size; ++i)
 	{

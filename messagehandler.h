@@ -26,12 +26,12 @@ class MessageHandler
 		void init(size_t aBufferSize=BUFFER_SIZE);
 		void run(); // check if there is a message in buffer to process.
 
-		void insertChar(unsigned char c);
+                void insertChar(char c);
 
 		void setCallback(funcPtr func);
 
 		int find(char *aStr);
-		unsigned char getChar(unsigned int aOdx);		
+                char getChar(int aOdx);
 
 		//get
 		size_t bufferSize() const; ///< return the buffer size.
@@ -44,7 +44,7 @@ class MessageHandler
 	private:
 		bool hasMessage() const;
 	private:
-		unsigned char* mBuffer;
+                char* mBuffer;
 		size_t mBufferSize;
 		int mBufferStart;
 		int mBufferEnd;
