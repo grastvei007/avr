@@ -52,64 +52,45 @@ void Message::add(char* aKey, double aValue)
 
 void Message::add(char *aKey, float aValue)
 {
-/*    size_t keySize = strlen(aKey);
-    char *pair = (char*) malloc(keySize+6);
-
-    int t=0;
+    size_t keySize = strlen(aKey);
     for(int i=0; i<keySize; ++i)
+        mMessage[++mMessageSize] = aKey[i];
+
+    mMessage[++mMessageSize] = ':';
+    mMessage[++mMessageSize] = 'f';
+
+    union U
     {
-        pair[i] = aKey[i];
-        t++;
-    }
-    pair[t++] = ':';
-    pair[t++] = 'f'; // mark value as float.
-
-    unsigned char bytes[4];
-    memcpy(bytes, (unsigned char*) &aValue, 4);
-    pair[t++] = bytes[0];
-    pair[t++] = bytes[1];
-    pair[t++] = bytes[2];
-    pair[t++] = bytes[3];
-
-    unsigned char *temp = (unsigned char*) malloc(mMessageSize+keySize+6);
-    memcpy(temp, mMessage, mMessageSize);
-    int k=0;
-    for(int i=mMessageSize; i<(mMessageSize+keySize+6); ++i)
-        temp[i] = pair[k++];
-    mMessageSize += (keySize+6);
-    free(mMessage);
-	free(pair);
-    mMessage = temp;
-    temp = NULL;
-	pair = NULL;*/
+        float f;
+        char bytes[4];
+    }u;
+    u.f = aValue;
+    mMessage[++mMessageSize] = u.bytes[0];
+    mMessage[++mMessageSize] = u.bytes[1];
+    mMessage[++mMessageSize] = u.bytes[2];
+    mMessage[++mMessageSize] = u.bytes[3];
 }
 
 
 void Message::add(char* aKey, int aValue)
 {
-/*	size_t keySize = strlen(aKey);
-	unsigned char* pair = (unsigned char*)malloc(keySize+6);
-	memcpy(pair, aKey, keySize);
+    size_t keySize = strlen(aKey);
+    for(int i=0; i<keySize; ++i)
+        mMessage[++mMessageSize] = aKey[i];
 
-	pair[keySize+1] = ':';
-	pair[keySize+2] = 'i';
+    mMessage[++mMessageSize] = ':';
+    mMessage[++mMessageSize] = 'i';
 
-	unsigned char bytes[4];
-	memcpy(bytes, (unsigned char*)&aValue, 4);
-
-	pair[keySize+3] = bytes[0];
-	pair[keySize+4] = bytes[1];
-	pair[keySize+5] = bytes[2];
-	pair[keySize+6] = bytes[3];
-
-	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+6);
-	memcpy(temp+(mMessageSize+1), pair, keySize+6);
-	
-	free(mMessage);
-	free(pair);
-	mMessage = temp;
-	temp = NULL;		
-	pair = NULL;*/
+    union U
+    {
+        int i;
+        char bytes[4];
+    }u;
+    u.i = aValue;
+    mMessage[++mMessageSize] = u.bytes[0];
+    mMessage[++mMessageSize] = u.bytes[1];
+    mMessage[++mMessageSize] = u.bytes[2];
+    mMessage[++mMessageSize] = u.bytes[3];
 }
 
 /**
@@ -117,23 +98,15 @@ void Message::add(char* aKey, int aValue)
 **/
 void Message::add(char* aKey, bool aValue)
 {
-/*	size_t keySize = strlen(aKey);
-	unsigned char* pair = (unsigned char*)malloc(keySize+3);
-	memcpy(pair, aKey, keySize);
+    size_t keySize = strlen(aKey);
 
-	pair[keySize+1] = ':';
-	pair[keySize+2] = 'b';
-	pair[keySize+3] = (aValue) ? '1' : '0';
+    for(int i=0; i<keySize; ++i)
+        mMessage[++mMessageSize] = aKey[i];
 
-	unsigned char* temp = (unsigned char*)malloc(mMessageSize+keySize+3);
-	memcpy(temp, mMessage, mMessageSize);
-	memcpy(temp+(mMessageSize+1), pair, keySize+3);
+    mMessage[++mMessageSize] = ':';
+    mMessage[++mMessageSize] = 'b';
+    mMessage[++mMessageSize] = (aValue) ? char(1) : char(0);
 
-	free(mMessage);
-	free(pair);
-	mMessage = temp;
-	temp = NULL;
-	pair = NULL;*/
 }
 
 
@@ -209,7 +182,7 @@ int Message::getMessage(char *&rMessage)
 }
 
 
-void Message::setMessage(char *&aMessage, size_t aMessageSize)
+void Message::setMessage(char *aMessage, size_t aMessageSize)
 {
 	mIsValid = validateMessage(aMessage, aMessageSize);
 }
@@ -258,8 +231,11 @@ int Message::validateMessage(const char *aMsg, size_t aSize)
             n += aMsg[i];
     }
 
-    int r = n % 256;
-    if( r != aMsg[msgSize-2])
+    int r = n % 255;
+    int t = aMsg[msgSize-2];
+    while(t<0)
+        t += 256;
+    if( r != t)
         return -3;
 
     mMessageSize = msgSize;

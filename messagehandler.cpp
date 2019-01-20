@@ -188,7 +188,7 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 	if(size  <= 10)
 		return -1;
 	
-	char* msg = (char*)malloc(size);
+    char msg[size];
 	for(int i = 0; i<size; ++i)
 	{
 		msg[i] = mBuffer[(aStartPosInBuffer+i)%mBufferSize];
@@ -196,7 +196,7 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 
 	rMessage = (Message*)malloc(sizeof(Message));
 	rMessage->init();
-	rMessage->setMessage(msg, size);
+    rMessage->setMessage(msg, size);
 
 	if(rMessage->isValid() != 1)
 	{
@@ -212,6 +212,6 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 			mBuffer[pos] = '0'; // overwrite with something
 		}
 	}
-	free(msg);
+    //free(msg);
 }
 

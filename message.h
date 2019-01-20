@@ -54,7 +54,7 @@ public:
 	/** brief Direct set the message buffer,
 		@warning replaces existing message if it exist.
 	**/
-    void setMessage( char *&aMsg, size_t aMessageSize);
+    void setMessage( char *aMsg, size_t aMessageSize);
 	void print();
 private:
     void calcCheckcode();
