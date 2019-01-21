@@ -1,8 +1,14 @@
 #ifndef ADC_H
 #define ADC_H
 
+// flag used to test the adc module
+// remove while use on atmega.
+#define ADC_TEST
 
-typedef void (*CallbackFunc)(float);
+/** \brief Callback when there are changes on the adc reading.
+**/
+
+typedef void (*callbackFuncAdc)(int);
 
 
 
@@ -29,7 +35,7 @@ class Adc
 		void enableChannel(Channel aChannel);
 		void disableChannel(Channel aChannel);
 
-		void setCallbackFunc(CallbackFunc aCallbackFuncm, Channel aChannel);
+        void setCallbackFunc(callbackFuncAdc aCallbackFunc);
 
 		bool isChannelEnabled(Channel aChannel);
 		void setChannelValue(float aValue, Channel aChannel);
@@ -42,7 +48,7 @@ class Adc
 		void setAdmux();
 
 	private:
-		CallbackFunc mCallbackFunc[5];
+		callbackFuncAdc mCallback;
 		bool mChannel[5]; ///< enable/disable channels
 		float mCurrentReading[5];
 		Channel mCurrentChannel;

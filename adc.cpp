@@ -1,8 +1,12 @@
 #include "adc.h"
 
+#ifndef ADC_TEST
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+
+#endif
 
 #include <stdlib.h>
 
@@ -21,6 +25,8 @@ Adc::~Adc()
 
 void Adc::init()
 {
+
+#ifndef ADC_TEST
 	for(int i=0; i<5; ++i)
 	{
 		mCallbackFunc[i] = NULL;
@@ -43,12 +49,16 @@ void Adc::init()
 
 //	ADCSRA |= (1<<ADIE); // enable interupt
 
+#endif
+
 }
 
 
 void Adc::enable()
 {
+#ifndef ADC_TEST
 	ADCSRA |= (1<<ADIE); // enable interupt
+#endif
 }
 
 
@@ -70,9 +80,9 @@ void Adc::disableChannel(Channel aChannel)
 }
 
 
-void Adc::setCallbackFunc(CallbackFunc aFunc, Channel aChannel)
+void Adc::setCallbackFunc(callbackFuncAdc aFunc)
 {
-	mCallbackFunc[aChannel] = aFunc;
+    mCallback = aFunc;
 }
 
 
@@ -85,8 +95,8 @@ bool Adc::isChannelEnabled(Adc::Channel aChannel)
 void Adc::setChannelValue(float aValue, Adc::Channel aChannel)
 {
 	mCurrentReading[aChannel] = aValue;
-	if(mCallbackFunc[aChannel])
-		mCallbackFunc[aChannel] (aValue);
+    if(mCallback)
+        mCallback(aChannel);
 }
 
 
@@ -107,6 +117,7 @@ Adc::Channel Adc::nextEnabledChannel()
 
 void Adc::valueReady()
 {
+#ifndef ADC_TEST
 	static int ready = 0;
 	uint8_t low = ADCL;
 	uint16_t value = ADCH<<8 | low;
@@ -128,11 +139,13 @@ void Adc::valueReady()
 
 	// do a reading!
 	ADCSRA |= 1<<ADSC;
+#endif
 }
 
 
 void Adc::setAdmux()
 {
+#ifndef ADC_TEST
 	switch(mCurrentChannel)
 	{
 		case eAdc0:
@@ -145,11 +158,13 @@ void Adc::setAdmux()
 			ADMUX = 0x42;
 			break;
 	}
+#endif
 }
 
-
+#ifndef ADC_TEST
 ISR(ADC_vect)
 {
 	// update the adc with value.
 	adc.valueReady();
 }
+#endif
