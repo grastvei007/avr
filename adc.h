@@ -1,9 +1,7 @@
 #ifndef ADC_H
 #define ADC_H
 
-// flag used to test the adc module
-// remove while use on atmega.
-#define ADC_TEST
+
 
 /** \brief Callback when there are changes on the adc reading.
 **/
@@ -40,6 +38,9 @@ class Adc
 		bool isChannelEnabled(Channel aChannel);
 		void setChannelValue(float aValue, Channel aChannel);
 		Channel nextEnabledChannel();
+
+        // get
+        float getChannelReading(Channel aChannel);
 
 		// ISR call
 		void valueReady();

@@ -1,107 +1,50 @@
-# the GNU make program is found at $(ARDUINO_DIR)\hardware\tools\avr\utils\bin
-#
-CPU     := atmega328p
-COMPORT ?= COM11
+## General Flags
+PROJECT = june
+MCU = atmega328p
+TARGET = libJune.a
+CC = avr-g++
+F_CPU	:=  1200000LL
 
-VERSION      := 0.1
-PROGRAM_NAME := avrtest
+## Options common to compile, link and assembly rules
+COMMON = -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 
-#MSWINDOWS    := 1
-ARDUINO_DIR  := 
+## Compile options common for all C compilation units.
+CFLAGS = $(COMMON)
+CFLAGS += -Wall -gdwarf-2 -Os  -funsigned-bitfields -fpack-struct -fshort-enums
+#CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F) 
 
-# Chip and programmer 
-DEVICE_PROGRAMMER := usbtiny
+## Assembly specific flags
+ASMFLAGS = $(COMMON)
+ASMFLAGS += $(CFLAGS)
+ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
-#DEVICE_PROGRAMMER := stk500v1 -P /dev/ttyACM0
+## Objects that must be built in order to link
+OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o
 
-# define the CPU variable on the command line to the avr-g++ cpu name to get the default settings for that CPU
-ifndef $(CPU)
-# what gcc/g++ calls this chip. To list, try "avr-g++ -mlist-devices --target-help"
-CPU_GCC           := attiny24a
-# what avrdude calls this chip: To list, try "avrdude -c usbtiny"
-CPU_AVRDUDE      := t24
-# CPU frequency in hz
-F_CPU             := 8000000ULL
-endif
+## Build
+all: $(TARGET)
 
-ifeq ($(CPU),attiny13a)
-CPU_AVRDUDE := t13
-CPU_GCC     := attiny13a
-#F_CPU       ?= 9600000ULL
-F_CPU       := 1200000LL
-endif
-ifeq ($(CPU),atmega328p)
-CPU_AVRDUDE := m328p
-CPU_GCC     := atmega328p
-#F_CPU       := 1600000LL
-F_CPU       := 	1200000LL
-endif
+## Compile
+adc.o: adc.cpp
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
+pwm.o: pwm.cpp
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
+message.o: message.cpp
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
-# FLAGS
-CF      := -c -g -Os -mmcu=$(CPU_GCC) -DF_CPU=$(F_CPU) 
-LF      := -Os -mmcu=$(CPU_GCC) -Wl,--gc-sections -L -lm
-# TOOLS
-CC          := avr-g++
-avr_objcopy ?= avr-objcopy
-avrdude     ?= avrdude
+messagehandler.o: messagehandler.cpp
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
-# Discover all the files
-Hfiles  := $(wildcard *.h)
-Cfiles  := $(wildcard *.cpp) $(wildcard *.c) $(wildcard *.pde)
-Ofiles  := $(patsubst %.pde,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%_$(CPU_GCC).o,$(Cfiles))))
-PdeFile := $(wildcard *.pde)
+messagetranslationsenter.o: messagetranslationsenter.cpp
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
+## Archive into a library file (.a)
+$(TARGET): $(OBJECTS)
+	avr-ar -rs $(TARGET) $(OBJECTS)
 
-
-default: programmedDevice_$(CPU_GCC).time
-
-programmedDevice_$(CPU_GCC).time:  $(PROGRAM_NAME)_$(CPU_GCC).hex
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE) -v -U flash:w:$(PROGRAM_NAME)_$(CPU_GCC).hex
-	touch programmedDevice_$(CPU_GCC).time
-
-$(PROGRAM_NAME)_$(CPU_GCC).hex: $(Ofiles)
-	$(CC) $(LF) -o $(PROGRAM_NAME)_$(CPU_GCC).elf $(Ofiles)
-	$(avr_objcopy) -j .text -j .data -O ihex  $(PROGRAM_NAME)_$(CPU_GCC).elf  $(PROGRAM_NAME)_$(CPU_GCC).hex
-
+## Clean target
+.PHONY: clean
 clean:
-	-rm -f *.o *.hex *.elf programmedDevice_*.time
-
-dumpchip_srec: 
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE) -U lfuse:r:lfuse_$(CPU_GCC).hex:i -U hfuse:r:hfuse_$(CPU_GCC).hex:i -U efuse:r:efuse_$(CPU_GCC).hex:i -U eeprom:r:eeprom_$(CPU_GCC).hex:i -U flash:r:flash_$(CPU_GCC).hex:i -U lock:r:lock_$(CPU_GCC).hex:i -U signature:r:sig_$(CPU_GCC).hex:i 
-
-dumpchip: 
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE) -U lfuse:r:lfuse_$(CPU_GCC).bin:r -U hfuse:r:hfuse_$(CPU_GCC).bin:r -U eeprom:r:eeprom_$(CPU_GCC).bin:r -U flash:r:flash_$(CPU_GCC).bin:r -U lock:r:lock_$(CPU_GCC).bin:r -U signature:r:sig_$(CPU_GCC).bin:r -U efuse:r:efuse_$(CPU_GCC).bin:r 
-
-check:
-	$(avrdude) -v -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE)
-
-ifeq ($(CPU),attiny13a)
-
-fuse_8mhz_internal:
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE) -U lfuse:w:0x3a:m
-
-fuse_1mhz_internal:
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE) -U lfuse:w:0x2a:m
-
-fuse_slow_clock:
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p $(CPU_AVRDUDE) -U lfuse:w:0x29:m
-
-endif
-ifeq ($(CPU),atmega48a)
-
-fuse_8mhz_internal:
-	$(avrdude) -c $(DEVICE_PROGRAMMER) -p m48 -U lfuse:w:0xe2:m
-endif
-
-
-%_$(CPU_GCC).o: %.cpp $(Hfiles)
-	$(CC) $(CF) -o $@ $<
-
-%_$(CPU_GCC).o: %.c $(Hfiles)
-	$(CC) $(CF) -o $@ $<
-
-%_$(CPU_GCC).o: %.pde $(Hfiles)
-	$(CC) $(CF) -x c++ -o $@ $<
-
+	-rm -rf $(OBJECTS) $(TARGET) #dep/*

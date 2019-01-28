@@ -1,11 +1,12 @@
 #include "adc.h"
 
-#ifndef ADC_TEST
+#ifndef AVR_TEST
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-
+#else
+#include <QDebug>
 #endif
 
 #include <stdlib.h>
@@ -26,15 +27,15 @@ Adc::~Adc()
 void Adc::init()
 {
 
-#ifndef ADC_TEST
+
 	for(int i=0; i<5; ++i)
 	{
-		mCallbackFunc[i] = NULL;
+        mCallback = NULL;
 		mChannel[i] = false;
 		mCurrentReading[i] = 0.0;
 	}
 	
-
+#ifndef AVR_TEST
     ADCSRA = 0;
     ADCSRA |= ((1<<ADPS2)|(1<<ADPS1));// |(1<<ADPS0));    //16Mhz/128 = 125Khz the ADC reference clock
     ADMUX |= (1<<REFS0);                //Voltage reference from Avcc (5v)
@@ -56,8 +57,10 @@ void Adc::init()
 
 void Adc::enable()
 {
-#ifndef ADC_TEST
+#ifndef AVR_TEST
 	ADCSRA |= (1<<ADIE); // enable interupt
+#else
+    qDebug() << __FUNCTION__;
 #endif
 }
 
@@ -71,6 +74,10 @@ void Adc::disable()
 void Adc::enableChannel(Channel aChannel)
 {
 	mChannel[aChannel] = true;
+#ifdef AVR_TEST
+    qDebug() << __FUNCTION__ << " " << aChannel;
+#endif
+
 }
 
 
@@ -117,7 +124,7 @@ Adc::Channel Adc::nextEnabledChannel()
 
 void Adc::valueReady()
 {
-#ifndef ADC_TEST
+#ifndef AVR_TEST
 	static int ready = 0;
 	uint8_t low = ADCL;
 	uint16_t value = ADCH<<8 | low;
@@ -133,19 +140,24 @@ void Adc::valueReady()
 		setChannelValue(scaled, mCurrentChannel);
 		mCurrentChannel = nextEnabledChannel();
 		setAdmux();
+        ready = 0;
 	}
 	else
 		ready++;
 
 	// do a reading!
 	ADCSRA |= 1<<ADSC;
+#else
+    setChannelValue(1.0, mCurrentChannel);
+    mCurrentChannel = nextEnabledChannel();
+    setAdmux();
 #endif
 }
 
 
 void Adc::setAdmux()
 {
-#ifndef ADC_TEST
+#ifndef AVR_TEST
 	switch(mCurrentChannel)
 	{
 		case eAdc0:
@@ -158,13 +170,21 @@ void Adc::setAdmux()
 			ADMUX = 0x42;
 			break;
 	}
+#else
+    qDebug() << __FUNCTION__ << " mux channel: " << mCurrentChannel;
 #endif
 }
 
-#ifndef ADC_TEST
+#ifndef AVR_TEST
 ISR(ADC_vect)
 {
 	// update the adc with value.
 	adc.valueReady();
 }
 #endif
+
+
+float Adc::getChannelReading(Adc::Channel aChannel)
+{
+    return mCurrentReading[aChannel];
+}
