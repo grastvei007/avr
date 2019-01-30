@@ -10,7 +10,7 @@ COMMON = -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
-CFLAGS += -Wall -gdwarf-2 -Os  -funsigned-bitfields -fpack-struct -fshort-enums
+CFLAGS += -Wall -Os
 #CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F) 
 
 ## Assembly specific flags
@@ -42,7 +42,7 @@ messagetranslationsenter.o: messagetranslationsenter.cpp
 
 ## Archive into a library file (.a)
 $(TARGET): $(OBJECTS)
-	avr-ar -rs $(TARGET) $(OBJECTS)
+	avr-ar -rcs $(TARGET) $(OBJECTS)
 
 ## Clean target
 .PHONY: clean
