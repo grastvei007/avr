@@ -11,6 +11,8 @@
 
 #include <stdlib.h>
 
+#include "usart.h"
+
 Adc::Adc()
 {
 	init();
@@ -101,9 +103,13 @@ bool Adc::isChannelEnabled(Adc::Channel aChannel)
 
 void Adc::setChannelValue(float aValue, Adc::Channel aChannel)
 {
+	USART_putstring("val");
 	mCurrentReading[aChannel] = aValue;
     if(mCallback)
+	{
+		USART_putstring(" cb ");
         mCallback(aChannel);
+	}
 }
 
 
@@ -125,6 +131,7 @@ Adc::Channel Adc::nextEnabledChannel()
 void Adc::valueReady()
 {
 #ifndef AVR_TEST
+//	USART_putstring("adc::valueReady");
 	static int ready = 0;
 	uint8_t low = ADCL;
 	uint16_t value = ADCH<<8 | low;
