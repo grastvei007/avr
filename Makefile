@@ -13,7 +13,7 @@ CFLAGS = $(COMMON)
 CFLAGS += -Wall -Os -MD -MP -MT -MF
 
 ## Objects that must be built in order to link
-OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o
+OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o
 
 ## Build
 all: $(TARGET)
@@ -32,6 +32,9 @@ messagehandler.o: messagehandler.cpp
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 messagetranslationsenter.o: messagetranslationsenter.cpp
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
+
+portb.o: portb.cpp
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 usart.o: usart.cpp

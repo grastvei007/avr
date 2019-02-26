@@ -40,7 +40,7 @@ class MessageHandler
 
 		//debug
 		void printBuffer() const;
-
+		void getBuffer(char *aBuffer);
 	private:
 		bool hasMessage() const;
 	private:

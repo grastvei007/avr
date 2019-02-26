@@ -1,4 +1,5 @@
 #include "messagehandler.h"
+#include "usart.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -116,13 +117,27 @@ size_t MessageHandler::size() const
 
 void MessageHandler::printBuffer() const
 {
+#ifndef AVR_TEST
+	USART_putMessage(mBuffer, mBufferSize);
+#else
 	printf("MessageHandler buffer\n");
         for(size_t i=0; i<bufferSize(); ++i)
 	{
 		printf("%c", mBuffer[i]);
 	}
 	printf("\n");
+#endif
 }
+
+
+void MessageHandler::getBuffer(char *aBuffer)
+{
+	for(unsigned int i=0; i<mBufferSize; ++i)
+	{
+		aBuffer[i] = mBuffer[i];
+	}
+}
+
 
 char MessageHandler::getChar(int aIdx)
 {
@@ -134,6 +149,33 @@ char MessageHandler::getChar(int aIdx)
 int MessageHandler::find(char *aStr)
 {
 	int len = strlen(aStr);
+	if(size() < len)
+		return -1;
+
+	if(len == 0)
+		return -1;
+
+	for(unsigned int i=0; i<bufferSize(); ++i)
+	{
+		if(mBuffer[i] == aStr[0])
+		{
+			bool found = true;
+			for(int k = 1; k<len; ++k)
+			{	
+				if(mBuffer[i+k] != aStr[k])
+				{
+					found = false;
+				}
+			}
+			if(found)
+				return i;
+		}
+	}
+
+	return -1;
+
+// old
+/*	int len = strlen(aStr);
 	if(size() < len)
 		return -1;
 
@@ -169,7 +211,7 @@ int MessageHandler::find(char *aStr)
 			}
 		}
 	}
-	return -1;
+	return -1;*/
 }
 
 

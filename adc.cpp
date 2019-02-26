@@ -10,6 +10,7 @@
 #endif
 
 #include <stdlib.h>
+#include <math.h>
 
 #include "usart.h"
 
@@ -29,10 +30,9 @@ Adc::~Adc()
 void Adc::init()
 {
 
-
+	mCallback = NULL;
 	for(int i=0; i<5; ++i)
 	{
-        mCallback = NULL;
 		mChannel[i] = false;
 		mCurrentReading[i] = 0.0;
 	}
@@ -44,7 +44,7 @@ void Adc::init()
 
 //    ADCSRA |= (1<<ADIE); // enable interupt
     ADCSRA |= 1<<ADEN;
-  //  sei();
+    sei();
 
     // ADMUX setup is 0b01000000 hex 40
 
@@ -103,11 +103,15 @@ bool Adc::isChannelEnabled(Adc::Channel aChannel)
 
 void Adc::setChannelValue(float aValue, Adc::Channel aChannel)
 {
-	USART_putstring("val");
+	float e = mCurrentReading[aChannel] - aValue;
+	if( fabs(e) < 0.01)
+	{
+		readNext();
+		return; 
+	}
 	mCurrentReading[aChannel] = aValue;
     if(mCallback)
 	{
-		USART_putstring(" cb ");
         mCallback(aChannel);
 	}
 }
@@ -131,7 +135,6 @@ Adc::Channel Adc::nextEnabledChannel()
 void Adc::valueReady()
 {
 #ifndef AVR_TEST
-//	USART_putstring("adc::valueReady");
 	static int ready = 0;
 	uint8_t low = ADCL;
 	uint16_t value = ADCH<<8 | low;
@@ -148,12 +151,17 @@ void Adc::valueReady()
 		mCurrentChannel = nextEnabledChannel();
 		setAdmux();
         ready = 0;
+		mDataReady = true;
 	}
 	else
+	{
 		ready++;
+		ADCSRA |= 1<<ADSC;
+	}
 
 	// do a reading!
-	ADCSRA |= 1<<ADSC;
+    //TODO: put into a free ride mode.
+	//ADCSRA |= 1<<ADSC;
 #else
     setChannelValue(1.0, mCurrentChannel);
     mCurrentChannel = nextEnabledChannel();
@@ -161,6 +169,13 @@ void Adc::valueReady()
 #endif
 }
 
+void Adc::readNext()
+{
+	mDataReady = false;
+#ifndef AVR_TEST
+	ADCSRA |= 1<<ADSC;
+#endif
+}
 
 void Adc::setAdmux()
 {
@@ -183,15 +198,21 @@ void Adc::setAdmux()
 }
 
 #ifndef AVR_TEST
-ISR(ADC_vect)
+/*ISR(ADC_vect)
 {
 	// update the adc with value.
 	adc.valueReady();
-}
+}*/
 #endif
 
 
 float Adc::getChannelReading(Adc::Channel aChannel)
 {
     return mCurrentReading[aChannel];
+}
+
+
+bool Adc::isDataReady() const
+{
+	return mDataReady;
 }

@@ -146,7 +146,6 @@ void Message::finnish()
 	mMessage[++mMessageSize] = '0';
 	mMessage[++mMessageSize] = '>';
 
-
     char buffer[4] = {0};
     sprintf(buffer, "%i", (int)mMessageSize+1);
     int t = strlen(buffer);
@@ -190,7 +189,7 @@ void Message::setMessage(char *aMessage, size_t aMessageSize)
 
 void Message::calcCheckcode()
 {
-    printf("calc check code\n");
+    //printf("calc check code\n");
     int n = 0;
     int r = 0;
     for(int i=0; i<mMessageSize+1; ++i)
@@ -202,8 +201,8 @@ void Message::calcCheckcode()
         printf("c(%i) %c\n", mMessage[i], mMessage[i]);
     }
     printf("\ndone\n");
-    r = n % 255;
-    printf("sum: %i, r=%i\n", n,r);
+    r = n % 256;
+    //printf("sum: %i, r=%i\n", n,r);
     mMessage[mMessageSize-1] = (char)r;
 }
 

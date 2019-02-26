@@ -39,9 +39,14 @@ class Adc
 		void setChannelValue(float aValue, Channel aChannel);
 		Channel nextEnabledChannel();
 
+		void readNext();
+
         // get
         float getChannelReading(Channel aChannel);
+		Channel getCurrentChannel() const;
 
+		bool isDataReady() const;
+		
 		// ISR call
 		void valueReady();
 
@@ -53,11 +58,12 @@ class Adc
 		bool mChannel[5]; ///< enable/disable channels
 		float mCurrentReading[5];
 		Channel mCurrentChannel;
+		volatile bool mDataReady;
 
 };
 
 
-static Adc adc;
+//static Adc adc;
 
 
 #endif

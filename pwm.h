@@ -31,7 +31,7 @@ class Pwm
 		void setDutyCycle(Channel aChannel, uint8_t aDutyCycle);
 };
 
-static Pwm pwm;
+//static Pwm pwm;
 
 
 #endif
