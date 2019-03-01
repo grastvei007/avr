@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "messagetranslationsenter.h"
 
 #include <string.h>
+#include <stdlib.h>
 //#include <stdio.h>
 
 MessageTranslationSenter::MessageTranslationSenter()
@@ -70,8 +71,11 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 	}
 
 	char *msg = NULL;
-    int size = aMsg->getMessage(msg);
-	fprintf(stderr, "s", msg);
+//    int size = aMsg->getMessage(msg);
+	int size = aMsg->getSize() + 1;
+	msg = (char*)malloc(size);
+	aMsg->getMessageData(msg);
+//	fprintf(stderr, "s", msg);
 	if(!msg || size < 0)
 		return;
 	
@@ -80,17 +84,17 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 	{
 		if( (size-pos) <= 2)
 			break;
-		fprintf(stderr, "translatepair\n");
+		//fprintf(stderr, "translatepair\n");
 		if(mDebug)
 			mDebug("translatePair");
 		pos += translateKeyValuePair(msg, pos);
 	}
-		
+	free(msg);	
 }
 
 int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 {
-	fprintf(stderr, "startpos, %i", aStartPos);
+	//fprintf(stderr, "startpos, %i", aStartPos);
 	char keyBuffer[Message::MaxKeySize] = {'\0'};
 	int steps = 0;
 	int startPosValue = 0;
@@ -104,8 +108,10 @@ int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 			break;
 		}
 		keyBuffer[steps++] = aMsg[i];
+		if(steps > Message::MaxKeySize)
+			break;
 	};
-	fprintf(stderr, "key %s", keyBuffer);
+	//fprintf(stderr, "key %s", keyBuffer);
 	char type = aMsg[aStartPos+steps];
 	steps++;
 

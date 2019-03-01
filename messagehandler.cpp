@@ -88,7 +88,7 @@ void MessageHandler::run()
     int startPos = find("<msg");
     if( startPos < 0)
         return;
-
+	//USART_putstring(" msg found ");
     Message *msg;
     getMessage(msg, startPos);
     if(!msg)
