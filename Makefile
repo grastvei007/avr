@@ -13,7 +13,7 @@ CFLAGS = $(COMMON)
 CFLAGS += -Wall -Os -MD -MP -MT -MF
 
 ## Objects that must be built in order to link
-OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o
+OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o tag.o
 
 ## Build
 all: $(TARGET)
@@ -39,6 +39,9 @@ portb.o: portb.cpp
 
 usart.o: usart.cpp
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
+
+tag.o: tag.cpp
+	$(CC) $(INCLUDE) $(CFLAGS) -c $<
 
 ## Archive into a library file (.a)
 $(TARGET): $(OBJECTS)
