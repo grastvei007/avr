@@ -11,7 +11,15 @@ namespace Tag
 	void createTag(char *aName, bool aValue);
 	void createTag(char *aName, int aValue);
 	void createTag(char *aName, float aValue);
+	void createTag(char *aName, char *aValue);
 
+	/** Set value on tags
+
+	**/
+	void setValue(char *aTagName, bool aValue);
+	void setValue(char *aTagName, int aValue);
+	void setValue(char *aTagName, float aValue);
+	void setValue(char *aTagName, char *aValue);
 };
 
 
