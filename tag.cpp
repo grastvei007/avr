@@ -1,5 +1,7 @@
 #include "tag.h"
 
+#include <stdlib.h>
+
 #include "message.h"
 #include "usart.h"
 
