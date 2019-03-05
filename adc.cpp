@@ -121,7 +121,7 @@ void Adc::setChannelValue(float aValue, Adc::Channel aChannel)
 	float e = mCurrentReading[aChannel] - aValue;
 	if( fabs(e) < 0.01)
 	{
-		readNext();
+//		readNext();
 		return; 
 	}
 	mCurrentReading[aChannel] = aValue;

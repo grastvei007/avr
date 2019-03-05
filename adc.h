@@ -20,6 +20,14 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 
 /** \brief Callback when there are changes on the adc reading.
+
+	To get the adc module up and running, the following implementation
+	is required in the main application.
+
+	ISR(ADC_vect)
+	{
+    	adc.valueReady(); // call to the module valueReady function. 
+	}
 **/
 
 typedef void (*callbackFuncAdc)(int);
