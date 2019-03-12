@@ -164,7 +164,7 @@ int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 
 bool MessageTranslationSenter::translateBool(char *aBool)
 {
-	return (*aBool == '1') ? true : false;
+	return (aBool[0] == '1') ? true : false;
 }
 
 
@@ -177,8 +177,16 @@ int MessageTranslationSenter::translateInt(char *aInt)
 
 float MessageTranslationSenter::translateFloat(char *aFloat)
 {
-	float f = aFloat[0] + (aFloat[1] << 8) + (aFloat[2] << 16) + (aFloat[3] << 24);
-	return f;
+	union U
+	{
+		float f;
+		char bytes[4];
+	}u;
+	u.bytes[0] = aFloat[0];
+	u.bytes[1] = aFloat[1];
+	u.bytes[2] = aFloat[2];
+	u.bytes[3] = aFloat[3];
+	return u.f;
 }
 
 

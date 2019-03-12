@@ -46,11 +46,10 @@ class MessageHandler
 		void setCallback(funcPtr func);
 
 		int find(char *aStr);
-                char getChar(int aOdx);
+        char getChar(int aOdx);
 
 		//get
 		size_t bufferSize() const; ///< return the buffer size.
-		size_t size() const; ///< return the size of chars current in the buffer.
 		int getMessage(Message *&rMsg, int aStartPosInBuffer);
 
 		//debug
@@ -59,9 +58,9 @@ class MessageHandler
 	private:
 		bool hasMessage() const;
 	private:
-                char* mBuffer;
+        char* mBuffer;
 		size_t mBufferSize;
-		int mBufferStart;
+	//	int mBufferStart;
 		int mBufferEnd;
 
 		funcPtr mCallback;;

@@ -34,7 +34,6 @@ MessageHandler::~MessageHandler()
 
 void MessageHandler::init(size_t aBufferSize)
 {
-	mBufferStart = 0;
 	mBufferEnd = 0;
 	mBufferSize = aBufferSize;
     mBuffer = (char*)malloc(aBufferSize);
@@ -58,28 +57,6 @@ void MessageHandler::insertChar(char c)
 	mBuffer[mBufferEnd++] = c;
 	if(mBufferEnd >= mBufferSize)
  		mBufferEnd = 0;
-
-
-	if(mBufferEnd == mBufferStart)
-		mBufferStart++;
-
-	if(mBufferStart >= mBufferSize)
-		mBufferStart = 0;
-
-/*
-	int startPos = find("<msg");
-	if( startPos < 0)
-		return;
-
-	Message *msg;
-	getMessage(msg, startPos);
-	if(!msg)
-		return;
-
-	if(mCallback)
-		mCallback(msg);
-	else
-		free(msg);*/
 }
 
 
@@ -114,22 +91,6 @@ size_t MessageHandler::bufferSize() const
 }
 
 
-size_t MessageHandler::size() const
-{
-	if(mBufferStart < mBufferEnd)
-	{
-		return mBufferEnd - mBufferStart;
-	}
-	else if(mBufferStart > mBufferEnd)
-	{
-		return (mBufferSize-mBufferStart)+mBufferEnd;
-	}
-	else
-		return 0;
-	
-}
-
-
 void MessageHandler::printBuffer() const
 {
 #ifndef AVR_TEST
@@ -153,10 +114,14 @@ void MessageHandler::getBuffer(char *aBuffer)
 	}
 }
 
+/** \brief Get the char from the buffer.
 
+	searches the buffer from begining to end.
+
+**/
 char MessageHandler::getChar(int aIdx)
 {
-	int pos = (mBufferStart + aIdx) % mBufferSize;
+	int pos = (mBufferEnd + 1) % mBufferSize;
 	return mBuffer[pos];
 }
 
@@ -164,12 +129,10 @@ char MessageHandler::getChar(int aIdx)
 int MessageHandler::find(char *aStr)
 {
 	int len = strlen(aStr);
-	if(size() < len)
+	if(len <= 0)
 		return -1;
 
-	if(len == 0)
-		return -1;
-
+	int startPos = (mBufferEnd + 1) % bufferSize();
 	for(unsigned int i=0; i<bufferSize(); ++i)
 	{
 		if(mBuffer[i] == aStr[0])
@@ -186,47 +149,7 @@ int MessageHandler::find(char *aStr)
 				return i;
 		}
 	}
-
 	return -1;
-
-// old
-/*	int len = strlen(aStr);
-	if(size() < len)
-		return -1;
-
-	if(len == 0)
-		return -1;
-	int k = 0;
-	for(int i=0; i<size()+1; i++)
-	{
-		int pos = (i + mBufferStart) % mBufferSize;
-		if(mBuffer[pos] == aStr[0])
-		{
-			int p = (pos+1);;
-			for(int j=1; j<len; j++)
-			{			
-				if(p > mBufferSize-1)
-					p = 0;
-					
-				if(mBuffer[p] == aStr[j])
-				{
-					k++;
-					p++;
-				}
-				else
-				{
-					k=0;
-					break;
-				}
-			}
-			if(k != 0)
-			{
-				int posInArray = i;
-				return (mBufferStart + posInArray) % mBufferSize;
-			}
-		}
-	}
-	return -1;*/
 }
 
 
