@@ -20,23 +20,23 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <stdio.h>
 #include <string.h>
 
-MessageHandler::MessageHandler(size_t aBufferSize)
+MessageHandler::MessageHandler()
 {
-	init(aBufferSize);
+	init();
 }
 
 
 MessageHandler::~MessageHandler()
 {
-	free(mBuffer);
+//	free(mBuffer);
 }
 
 
-void MessageHandler::init(size_t aBufferSize)
+void MessageHandler::init()
 {
 	mBufferEnd = 0;
-	mBufferSize = aBufferSize;
-    mBuffer = (char*)malloc(aBufferSize);
+	mBufferSize = BUFFER_SIZE;
+  //  mBuffer = (char*)malloc(aBufferSize);
     mCallback = NULL;
     for(size_t i=0; i<mBufferSize; ++i)
     {
@@ -94,7 +94,7 @@ size_t MessageHandler::bufferSize() const
 void MessageHandler::printBuffer() const
 {
 #ifndef AVR_TEST
-	USART_putMessage(mBuffer, mBufferSize);
+//	USART_putMessage(mBuffer, mBufferSize);
 #else
 	printf("MessageHandler buffer\n");
         for(size_t i=0; i<bufferSize(); ++i)

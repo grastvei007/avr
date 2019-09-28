@@ -36,9 +36,9 @@ typedef void (*funcPtr)(Message*&);
 class MessageHandler
 {
 	public:
-		MessageHandler(size_t aBufferSize = BUFFER_SIZE);
+		MessageHandler();
 		~MessageHandler();
-		void init(size_t aBufferSize=BUFFER_SIZE);
+		void init();
 		void run(); // check if there is a message in buffer to process.
 
                 void insertChar(char c);
@@ -58,7 +58,7 @@ class MessageHandler
 	private:
 		bool hasMessage() const;
 	private:
-        char* mBuffer;
+        char mBuffer[BUFFER_SIZE];
 		size_t mBufferSize;
 	//	int mBufferStart;
 		int mBufferEnd;
