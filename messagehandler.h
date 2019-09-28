@@ -58,7 +58,7 @@ class MessageHandler
 	private:
 		bool hasMessage() const;
 	private:
-        char mBuffer[BUFFER_SIZE];
+        volatile char mBuffer[BUFFER_SIZE];
 		size_t mBufferSize;
 	//	int mBufferStart;
 		int mBufferEnd;

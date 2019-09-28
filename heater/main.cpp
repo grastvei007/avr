@@ -81,7 +81,9 @@ int main()
 
 	pwm.init();
 	pwm.enable(Pwm::eChanPb3);
+	pwm.enable(Pwm::eChanPd3);
 	pwm.setDutyCycle(Pwm::eChanPb3, 0);
+	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
 	lock = false;
 	sei();
@@ -111,11 +113,13 @@ void onIntValueChanged(char *aKey, int aValue)
 {
 	if(strcmp(aKey, "fanLevel") == 0)
 	{
-
+		fan.newLevel = aValue;
+		fan.changed = true;
 	}
 	else if(strcmp(aKey, "effectLevel") == 0)
 	{
-
+		effect.newLevel = aValue;
+		effect.changed = true;
 	}
 }
 
@@ -193,11 +197,11 @@ ISR(TIMER1_COMPA_vect)
 	if(fan.changed)
 	{
 		fan.currentLevel = fan.newLevel;
-		Tag::setValue("fanLevel", fan.currentLevel);
+//		Tag::setValue("fanLevel", fan.currentLevel);
 
 		double step = (fan.pwmMax - fan.pwmMin)/(double)fan.maxLevel;
 		uint8_t pwmValue = fan.pwmMin + (step*fan.currentLevel);
-		pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);
+		pwm.setDutyCycle(Pwm::eChanPb3, fan.currentLevel);//  pwmValue);
 		fan.changed = false;
 
 		pump.setSpeed(25*fan.currentLevel); //TODO: move to effect.
@@ -205,11 +209,11 @@ ISR(TIMER1_COMPA_vect)
 	if(effect.changed)
 	{
 		effect.currentLevel = effect.newLevel;
-		Tag::setValue("effectLevel", effect.currentLevel);
+//		Tag::setValue("effectLevel", effect.currentLevel);
 
 		double step = (effect.pwmMax - effect.pwmMin)/(double)effect.maxLevel;
 		uint8_t pwmValue = effect.pwmMin + (step*effect.currentLevel);
-		pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
+		pwm.setDutyCycle(Pwm::eChanPd3, effect.currentLevel);//pwmValue);
 		effect.changed = false;
 	}
 

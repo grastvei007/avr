@@ -132,21 +132,27 @@ int MessageHandler::find(char *aStr)
 	if(len <= 0)
 		return -1;
 
-	int startPos = (mBufferEnd + 1) % bufferSize();
-	for(unsigned int i=0; i<bufferSize(); ++i)
+	int startPos = (mBufferEnd );// % bufferSize();
+	for(unsigned int i=0; i<BUFFER_SIZE; ++i)
 	{
-		if(mBuffer[i] == aStr[0])
+		int idx = startPos + i;
+		if(idx > BUFFER_SIZE)
+			idx -= BUFFER_SIZE;
+		if(mBuffer[idx] == aStr[0])
 		{
 			bool found = true;
 			for(int k = 1; k<len; ++k)
 			{	
-				if(mBuffer[i+k] != aStr[k])
+				int t = idx+k;
+				if(t > BUFFER_SIZE)
+					t -= BUFFER_SIZE;
+				if(mBuffer[t] != aStr[k])
 				{
 					found = false;
 				}
 			}
 			if(found)
-				return i;
+				return idx;
 		}
 	}
 	return -1;
@@ -159,10 +165,10 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 
 
 	char sizeBuffer[4];
-	sizeBuffer[0] = mBuffer[(aStartPosInBuffer+4)%mBufferSize];
-	sizeBuffer[1] = mBuffer[(aStartPosInBuffer+5)%mBufferSize];
-	sizeBuffer[2] = mBuffer[(aStartPosInBuffer+6)%mBufferSize];
-	sizeBuffer[3] = mBuffer[(aStartPosInBuffer+7)%mBufferSize];
+	sizeBuffer[0] = mBuffer[(aStartPosInBuffer+4)%BUFFER_SIZE];
+	sizeBuffer[1] = mBuffer[(aStartPosInBuffer+5)%BUFFER_SIZE];
+	sizeBuffer[2] = mBuffer[(aStartPosInBuffer+6)%BUFFER_SIZE];
+	sizeBuffer[3] = mBuffer[(aStartPosInBuffer+7)%BUFFER_SIZE];
 
 	int size = atoi(sizeBuffer);
 	if(size  <= 10)
@@ -171,7 +177,7 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
     char msg[size];
 	for(int i = 0; i<size; ++i)
 	{
-		msg[i] = mBuffer[(aStartPosInBuffer+i)%mBufferSize];
+		msg[i] = mBuffer[(aStartPosInBuffer+i)%BUFFER_SIZE];
 	}
 
 	rMessage = (Message*)malloc(sizeof(Message));
@@ -188,7 +194,7 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 	{	
 		for(int i=0; i<size; ++i)
 		{
-			int pos = (aStartPosInBuffer+i) % mBufferSize;
+			int pos = (aStartPosInBuffer+i) % BUFFER_SIZE;
 			mBuffer[pos] = '0'; // overwrite with something
 		}
 	}
