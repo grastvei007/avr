@@ -104,7 +104,10 @@ void onBoolValueChanged(char *aKey, bool aValue)
 {
 	if(strcmp(aKey, "on") == 0)
 	{
-
+		if(aValue)
+			PORTB &= ~(1<<PB0);
+		else
+			PORTB |= (1<<PB0);
 	}
 }
 
