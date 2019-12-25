@@ -4,6 +4,7 @@ MCU = atmega328p
 TARGET = libJune.a
 CC = avr-g++
 F_CPU	:=  1200000LL
+F_SCL	:=  100000L
 
 ## Options common to compile, link and assembly rules
 COMMON = -fpack-struct -fshort-enums -funsigned-char -funsigned-bitfields -mmcu=$(MCU) -DF_CPU=$(F_CPU)
@@ -13,7 +14,7 @@ CFLAGS = $(COMMON)
 CFLAGS += -Wall -Os -MD -MP -MT -MF
 
 ## Objects that must be built in order to link
-OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o tag.o
+OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o tag.o i2c.o
 
 ## Build
 all: $(TARGET)
@@ -41,6 +42,9 @@ usart.o: usart.cpp
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 tag.o: tag.cpp
+	$(CC) $(INCLUDE) $(CFLAGS) -c $<
+
+i2c.o: i2c.cpp
 	$(CC) $(INCLUDE) $(CFLAGS) -c $<
 
 ## Archive into a library file (.a)
