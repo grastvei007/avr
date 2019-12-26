@@ -25,7 +25,7 @@ int i2c_start()
 }
 
 
-int i2c_sendAddress(int8_t aAddress)
+int i2c_sendAddres(int8_t aAddress)
 {
 	TWDR = aAddress;
 	TWCR = TW_SEND;
