@@ -7,7 +7,7 @@ F_CPU	:=  1200000LL
 F_SCL	:=  100000L
 
 ## Options common to compile, link and assembly rules
-COMMON = -fpack-struct -fshort-enums -funsigned-char -funsigned-bitfields -mmcu=$(MCU) -DF_CPU=$(F_CPU)
+COMMON = -fpack-struct -fshort-enums -funsigned-char -funsigned-bitfields -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DF_SCL=$(F_SCL)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
