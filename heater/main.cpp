@@ -24,6 +24,9 @@ volatile bool lock;
 
 void init(); ///< init fan, and effect.
 
+
+ISR(PCINT0_vect);
+
 /**
 	Setting for fan blowing air.
 **/
@@ -86,10 +89,28 @@ int main()
 	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
 	lock = false;
-	sei();
+	//ouput pins
+	DDRB |= (1 << PB0);
+	DDRB |= (1 << PB2);
+	DDRB |= (1 << PB3);
+	DDRB |= (1 << PB4);
+	DDRB |= (1 << PB5);
 
-	DDRB |= (1<<PB0);
-	DDRB |= (1<<PB2);
+	DDRD |= (1 << PD3);
+
+	//input pins
+	DDRB &= ~(1 << PB1);
+
+	DDRD &= ~(1 << PD2);
+	DDRD &= ~(1 << PD4);
+	DDRD &= ~(1 << PD5);
+	DDRD &= ~(1 << PD6);
+	DDRD &= ~(1 << PD7);
+
+	PCMSK0 |= (1 << PCINT1);
+	PCICR |= (1 << PCIE0);
+
+	sei();
 
 	while(true)
 	{
@@ -186,6 +207,7 @@ void init()
 	effect.pwmMax = 255;
 }
 
+
 ISR(TIMER1_COMPA_vect)
 {
 	if(lock)
@@ -222,3 +244,14 @@ ISR(TIMER1_COMPA_vect)
 
 	lock = false;
 }
+
+
+ISR(PCINT0_vect)
+{
+	if(!PINB & (1 << PINB1))
+	{
+		onBoolValueChanged("on", true);
+	}
+
+}
+
