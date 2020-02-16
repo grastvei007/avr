@@ -32,7 +32,8 @@ enum State
 	eStarting,
 	eRuning,
 	eStoping,
-	eStoped
+	eStoped,
+	eSendTags
 };
 
 /**
@@ -63,7 +64,10 @@ struct Effect
 	int pwmMax;
 }effect;
 
-State state = eInit;
+volatile State state = eInit;
+volatile State returnState = eRuning;
+volatile int tagNumber = 0;
+
 int numPrePumps = 250; // 25 pumps 
 volatile bool isBurning = false;
 
@@ -203,11 +207,9 @@ void requestDeviceName()
 
 void requestCreateTags()
 {
-	Tag::createTag("burning", false);
-	Tag::createTag("fanLevel", fan.currentLevel);
-	Tag::createTag("effectLevel", effect.currentLevel);
-	Tag::createTag("on", false);
-//	Tag::createTag("burning", false);
+	returnState = state;
+	tagNumber = 0;
+	state = eSendTags;
 }
 
 
@@ -286,6 +288,20 @@ ISR(TIMER1_COMPA_vect)
 	else if(state == eStoped)
 	{
 
+	}
+	else if(state == eSendTags)
+	{
+		if(tagNumber == 0)
+		    Tag::createTag("burning", false);
+		else if(tagNumber == 1)
+		    Tag::createTag("fanLevel", fan.currentLevel);
+		else if(tagNumber == 2)
+	    	Tag::createTag("effectLevel", effect.currentLevel);
+		else if(tagNumber == 3)
+		    Tag::createTag("on", false);
+		else
+			state = returnState;
+		tagNumber++;
 	}
 
 	lock = false;
