@@ -144,7 +144,6 @@ int main()
 
 	USART_init();
 	initTimer();
-	lock = false;
 	//ouput pins
 	DDRB |= (1 << PB0);
 	DDRB |= (1 << PB1);
@@ -171,7 +170,7 @@ int main()
 	pump.setSpeed(255);
 
 	sei();
-
+	lock = false;
 	while(true)
 	{
 
