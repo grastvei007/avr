@@ -24,8 +24,16 @@ volatile bool lock;
 
 void init(); ///< init fan, and effect.
 
+//ISR(PCINT0_vect);
 
-ISR(PCINT0_vect);
+enum State
+{
+	eInit,
+	eStarting,
+	eRuning,
+	eStoping,
+	eStoped
+};
 
 /**
 	Setting for fan blowing air.
@@ -34,7 +42,7 @@ struct Fan
 {
 	volatile int newLevel;
 	volatile bool changed;
-	int currentLevel;
+	volatile int currentLevel;
 	int minLevel;
 	int maxLevel;
 	int pwmMin;
@@ -48,14 +56,16 @@ struct Effect
 {
 	volatile int newLevel;
 	volatile bool changed;
-	int currentLevel;
+	volatile int currentLevel;
 	int minLevel;
 	int maxLevel;
 	int pwmMin;
 	int pwmMax;
 }effect;
 
-
+State state = eInit;
+int numPrePumps = 250; // 25 pumps 
+volatile bool isBurning = false;
 
 void initTimer();
 
@@ -69,7 +79,7 @@ void onIntValueChanged(char *aKey, int aValue);
 int main()
 {
 	lock = true;
-	cli();
+//	cli();
 	initTimer();
 	USART_init();
 	mh.init();
@@ -83,20 +93,21 @@ int main()
 	mts.setCallbackIntValue(onIntValueChanged);
 
 	pwm.init();
+	sei();
 	pwm.enable(Pwm::eChanPb3);
 	pwm.enable(Pwm::eChanPd3);
-	pwm.setDutyCycle(Pwm::eChanPb3, 0);
-	pwm.setDutyCycle(Pwm::eChanPd3, 0);
+	pwm.setDutyCycle(Pwm::eChanPb3, 100);
+	pwm.setDutyCycle(Pwm::eChanPd3, 100);
 
 	lock = false;
 	//ouput pins
 	DDRB |= (1 << PB0);
 	DDRB |= (1 << PB2);
-	DDRB |= (1 << PB3);
+//	DDRB |= (1 << PB3);
 	DDRB |= (1 << PB4);
 	DDRB |= (1 << PB5);
 
-	DDRD |= (1 << PD3);
+//	DDRD |= (1 << PD3);
 
 	//input pins
 	DDRB &= ~(1 << PB1);
@@ -107,10 +118,13 @@ int main()
 	DDRD &= ~(1 << PD6);
 	DDRD &= ~(1 << PD7);
 
-	PCMSK0 |= (1 << PCINT1);
-	PCICR |= (1 << PCIE0);
+//	PCMSK0 |= (1 << PCINT1);
+//	PCICR |= (1 << PCIE0);
 
-	sei();
+	pump.start();
+	pump.setSpeed(255);
+
+//	sei();
 
 	while(true)
 	{
@@ -129,6 +143,14 @@ void onBoolValueChanged(char *aKey, bool aValue)
 			PORTB &= ~(1<<PB0);
 		else
 			PORTB |= (1<<PB0);
+	}
+	else if(strcmp(aKey, "burning") == 0)
+	{
+		isBurning = aValue;
+		if(aValue)
+			PORTB &= ~(1<<PB1);
+		else
+			PORTB |= (1 << PB1);
 	}
 }
 
@@ -181,10 +203,11 @@ void requestDeviceName()
 
 void requestCreateTags()
 {
-	//Tag::createTag("pb0", false);
+	Tag::createTag("burning", false);
 	Tag::createTag("fanLevel", fan.currentLevel);
 	Tag::createTag("effectLevel", effect.currentLevel);
 	Tag::createTag("on", false);
+//	Tag::createTag("burning", false);
 }
 
 
@@ -200,7 +223,7 @@ void init()
 
 	effect.newLevel = 0;
 	effect.changed = false;
-	effect.currentLevel = 0;
+	effect.currentLevel = 5;
 	effect.minLevel = 0;
 	effect.maxLevel = 10;
 	effect.pwmMin = 100;
@@ -219,27 +242,50 @@ ISR(TIMER1_COMPA_vect)
 
 	pump.update(0.1);
 
+	if(state == eInit)
+	{
+		numPrePumps--;
+		if(numPrePumps <= 0)
+		{
+			onBoolValueChanged("burning", false);
+			state = eStarting;
+		}
+	}
+	else if(state == eStarting)
+	{
+
+		if(isBurning)
+			state = eRuning;
+
+	}
+	else if(state == eRuning)
+	{
+
 	if(fan.changed)
 	{
-		fan.currentLevel = fan.newLevel;
-//		Tag::setValue("fanLevel", fan.currentLevel);
+			fan.currentLevel = fan.newLevel;
 
-		double step = (fan.pwmMax - fan.pwmMin)/(double)fan.maxLevel;
-		uint8_t pwmValue = fan.pwmMin + (step*fan.currentLevel);
-		pwm.setDutyCycle(Pwm::eChanPb3, fan.currentLevel);//  pwmValue);
-		fan.changed = false;
+			uint8_t pwmValue = 100 + (fan.currentLevel*15);
+			pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
+			fan.changed = false;
 
-		pump.setSpeed(25*fan.currentLevel); //TODO: move to effect.
+			pump.setSpeed(25*fan.currentLevel); //TODO: move to effect.
+		}
+		if(effect.changed)
+		{
+			effect.currentLevel = effect.newLevel;
+			uint8_t pwmValue = 100 + (effect.currentLevel*15);
+			pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
+			effect.changed = false;
+		}
 	}
-	if(effect.changed)
+	else if(state == eStoping)
 	{
-		effect.currentLevel = effect.newLevel;
-//		Tag::setValue("effectLevel", effect.currentLevel);
 
-		double step = (effect.pwmMax - effect.pwmMin)/(double)effect.maxLevel;
-		uint8_t pwmValue = effect.pwmMin + (step*effect.currentLevel);
-		pwm.setDutyCycle(Pwm::eChanPd3, effect.currentLevel);//pwmValue);
-		effect.changed = false;
+	}
+	else if(state == eStoped)
+	{
+
 	}
 
 	lock = false;
