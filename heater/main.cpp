@@ -13,7 +13,6 @@
 #include <tag.h>
 
 #include "pump.h"
-
 #define F_CPU 12000000UL
 
 MessageHandler mh;
@@ -68,6 +67,7 @@ volatile State state = eInit;
 volatile State returnState = eRuning;
 volatile int tagNumber = 0;
 volatile int updateTags = 0;
+volatile bool on = false;
 
 int numPrePumps = 250; // 25 pumps 
 volatile bool isBurning = false;
@@ -86,7 +86,7 @@ int main()
 	lock = true;
 //	cli();
 	initTimer();
-	USART_init();
+//	USART_init();
 	mh.init();
 	mh.setCallback(messageCallback);
 
@@ -96,13 +96,14 @@ int main()
 
 	mts.setCallbackBoolValue(onBoolValueChanged);
 	mts.setCallbackIntValue(onIntValueChanged);
+	USART_init();
 
 	pwm.init();
 	sei();
 	pwm.enable(Pwm::eChanPb3);
 	pwm.enable(Pwm::eChanPd3);
-	pwm.setDutyCycle(Pwm::eChanPb3, 100);
-	pwm.setDutyCycle(Pwm::eChanPd3, 100);
+	pwm.setDutyCycle(Pwm::eChanPb3, 0);
+	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
 	lock = false;
 	//ouput pins
@@ -148,6 +149,7 @@ void onBoolValueChanged(char *aKey, bool aValue)
 			PORTB &= ~(1<<PB0);
 		else
 			PORTB |= (1<<PB0);
+		on = aValue;
 	}
 	else if(strcmp(aKey, "burning") == 0)
 	{
@@ -252,13 +254,20 @@ ISR(TIMER1_COMPA_vect)
 		{
 			onBoolValueChanged("burning", false);
 			state = eStarting;
+			pwm.setDutyCycle(Pwm::eChanPd3, 250);
 		}
 	}
 	else if(state == eStarting)
 	{
 
 		if(isBurning)
+		{
 			state = eRuning;
+			Tag::setValue("on", true);
+			on = true;
+			pwm.setDutyCycle(Pwm::eChanPb3, 150);
+			pwm.setDutyCycle(Pwm::eChanPd3, 150);
+		}
 
 	}
 	else if(state == eRuning)
@@ -271,8 +280,7 @@ ISR(TIMER1_COMPA_vect)
 			uint8_t pwmValue = 100 + (fan.currentLevel*15);
 			pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
 			fan.changed = false;
-
-			pump.setSpeed(25*fan.currentLevel); //TODO: move to effect.
+			pump.setSpeed(25*fan.currentLevel);
 		}
 		if(effect.changed)
 		{
@@ -280,11 +288,22 @@ ISR(TIMER1_COMPA_vect)
 			uint8_t pwmValue = 100 + (effect.currentLevel*15);
 			pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
 			effect.changed = false;
+			pump.setSpeed(25*fan.currentLevel);
+		}
+		if(!on)
+		{
+			pump.stop();
+			state = eStoping;
 		}
 	}
 	else if(state == eStoping)
 	{
-
+		if(!isBurning)
+		{
+			pwm.setDutyCycle(Pwm::eChanPb3, 0);
+			pwm.setDutyCycle(Pwm::eChanPd3, 0);
+			state = eStoped;
+		}
 	}
 	else if(state == eStoped)
 	{
@@ -322,7 +341,13 @@ ISR(TIMER1_COMPA_vect)
 		else if(state == eSendTags)
 			Tag::setValue("state", "sendTags");
 
-		updateTags = 0;
+		if(updateTags == 11)
+			Tag::setValue("on", on);
+		else if(updateTags == 12)
+			Tag::setValue("burning", isBurning);
+	
+		if(updateTags >= 12)
+			updateTags = 0;
 	}
 
 	updateTags++;
