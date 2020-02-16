@@ -13,7 +13,7 @@
 #include <tag.h>
 
 #include "pump.h"
-#define F_CPU 12000000UL
+//#define F_CPU 12000000UL
 
 MessageHandler mh;
 MessageTranslationSenter mts;
@@ -24,6 +24,41 @@ volatile bool lock;
 void init(); ///< init fan, and effect.
 
 //ISR(PCINT0_vect);
+
+void USART_init(){
+    UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
+    UBRR0L = (uint8_t)(BAUD_PRESCALLER);
+
+     UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
+    //enable reception and RC complete interrupt
+     UCSR0B |= (1<<TXEN0) | (1<<RXEN0)|(1<<RXCIE0);
+}
+
+void USART_send(char data){
+
+ while(!(UCSR0A & (1<<UDRE0)));
+ UDR0 = data;
+
+}
+
+void USART_putstring(char* StringPtr){
+
+    while(*StringPtr != 0x00){
+         USART_send(*StringPtr);
+        StringPtr++;
+    }
+
+}
+
+void USART_putMessage(char *aMsg, int size)
+{
+    for(int i=0; i<size; ++i)
+    {
+        USART_send(aMsg[i]);
+    }
+}
+
+
 
 enum State
 {
@@ -68,6 +103,7 @@ volatile State returnState = eRuning;
 volatile int tagNumber = 0;
 volatile int updateTags = 0;
 volatile bool on = false;
+volatile bool isTagsRequested = false;
 
 int numPrePumps = 250; // 25 pumps 
 volatile bool isBurning = false;
@@ -84,8 +120,10 @@ void onIntValueChanged(char *aKey, int aValue);
 int main()
 {
 	lock = true;
-//	cli();
-	initTimer();
+	cli();
+	USART_init();
+	sei();
+//	initTimer();
 //	USART_init();
 	mh.init();
 	mh.setCallback(messageCallback);
@@ -96,33 +134,35 @@ int main()
 
 	mts.setCallbackBoolValue(onBoolValueChanged);
 	mts.setCallbackIntValue(onIntValueChanged);
-	USART_init();
+//	USART_init();
 
 	pwm.init();
-	sei();
 	pwm.enable(Pwm::eChanPb3);
 	pwm.enable(Pwm::eChanPd3);
 	pwm.setDutyCycle(Pwm::eChanPb3, 0);
 	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
+	USART_init();
+	initTimer();
 	lock = false;
 	//ouput pins
 	DDRB |= (1 << PB0);
+	DDRB |= (1 << PB1);
 	DDRB |= (1 << PB2);
 //	DDRB |= (1 << PB3);
-	DDRB |= (1 << PB4);
-	DDRB |= (1 << PB5);
+//	DDRB |= (1 << PB4);
+//	DDRB |= (1 << PB5);
 
 //	DDRD |= (1 << PD3);
 
 	//input pins
-	DDRB &= ~(1 << PB1);
+//	DDRB &= ~(1 << PB1);
 
-	DDRD &= ~(1 << PD2);
+/*	DDRD &= ~(1 << PD2);
 	DDRD &= ~(1 << PD4);
 	DDRD &= ~(1 << PD5);
 	DDRD &= ~(1 << PD6);
-	DDRD &= ~(1 << PD7);
+	DDRD &= ~(1 << PD7);*/
 
 //	PCMSK0 |= (1 << PCINT1);
 //	PCICR |= (1 << PCIE0);
@@ -130,7 +170,7 @@ int main()
 	pump.start();
 	pump.setSpeed(255);
 
-//	sei();
+	sei();
 
 	while(true)
 	{
@@ -213,6 +253,7 @@ void requestCreateTags()
 	returnState = state;
 	tagNumber = 0;
 	state = eSendTags;
+	isTagsRequested = true;
 }
 
 
@@ -347,7 +388,11 @@ ISR(TIMER1_COMPA_vect)
 			Tag::setValue("burning", isBurning);
 	
 		if(updateTags >= 12)
+		{
 			updateTags = 0;
+//			if(!isTagsRequested)
+//				Tag::setValue("deviceName", "heater");
+		}
 	}
 
 	updateTags++;

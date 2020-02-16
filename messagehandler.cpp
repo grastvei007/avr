@@ -56,7 +56,11 @@ void MessageHandler::insertChar(char c)
 	
 	mBuffer[mBufferEnd++] = c;
 	if(mBufferEnd >= mBufferSize)
+	{
+//		for(int i=0; i<mBufferSize; ++i)
+//			mBuffer[i] = '0';
  		mBufferEnd = 0;
+	}
 }
 
 
@@ -132,7 +136,7 @@ int MessageHandler::find(char *aStr)
 	if(len <= 0)
 		return -1;
 
-	int startPos = (mBufferEnd );// % bufferSize();
+	int startPos =  (mBufferEnd );// % bufferSize();
 	for(unsigned int i=0; i<BUFFER_SIZE; ++i)
 	{
 		int idx = startPos + i;
