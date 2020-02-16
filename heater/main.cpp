@@ -67,6 +67,7 @@ struct Effect
 volatile State state = eInit;
 volatile State returnState = eRuning;
 volatile int tagNumber = 0;
+volatile int updateTags = 0;
 
 int numPrePumps = 250; // 25 pumps 
 volatile bool isBurning = false;
@@ -299,11 +300,32 @@ ISR(TIMER1_COMPA_vect)
 	    	Tag::createTag("effectLevel", effect.currentLevel);
 		else if(tagNumber == 3)
 		    Tag::createTag("on", false);
+		else if(tagNumber == 4)
+			Tag::createTag("state", "sendTags");
 		else
 			state = returnState;
 		tagNumber++;
 	}
 
+	if(updateTags >= 10)
+	{
+		if(state == eInit)
+			Tag::setValue("state", "init");
+		else if(state == eStarting)
+			Tag::setValue("state", "starting");
+		else if(state == eRuning)
+			Tag::setValue("state", "running");
+		else if(state == eStoping)
+			Tag::setValue("state", "stoping");
+		else if(state == eStoped)
+			Tag::setValue("state", "stoped");
+		else if(state == eSendTags)
+			Tag::setValue("state", "sendTags");
+
+		updateTags = 0;
+	}
+
+	updateTags++;
 	lock = false;
 }
 
