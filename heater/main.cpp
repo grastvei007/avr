@@ -25,41 +25,6 @@ void init(); ///< init fan, and effect.
 
 //ISR(PCINT0_vect);
 
-void USART_init(){
-    UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
-    UBRR0L = (uint8_t)(BAUD_PRESCALLER);
-
-     UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
-    //enable reception and RC complete interrupt
-     UCSR0B |= (1<<TXEN0) | (1<<RXEN0)|(1<<RXCIE0);
-}
-
-void USART_send(char data){
-
- while(!(UCSR0A & (1<<UDRE0)));
- UDR0 = data;
-
-}
-
-void USART_putstring(char* StringPtr){
-
-    while(*StringPtr != 0x00){
-         USART_send(*StringPtr);
-        StringPtr++;
-    }
-
-}
-
-void USART_putMessage(char *aMsg, int size)
-{
-    for(int i=0; i<size; ++i)
-    {
-        USART_send(aMsg[i]);
-    }
-}
-
-
-
 enum State
 {
 	eInit,
@@ -123,8 +88,6 @@ int main()
 	cli();
 	USART_init();
 	sei();
-//	initTimer();
-//	USART_init();
 	mh.init();
 	mh.setCallback(messageCallback);
 
@@ -134,7 +97,6 @@ int main()
 
 	mts.setCallbackBoolValue(onBoolValueChanged);
 	mts.setCallbackIntValue(onIntValueChanged);
-//	USART_init();
 
 	pwm.init();
 	pwm.enable(Pwm::eChanPb3);
@@ -389,8 +351,6 @@ ISR(TIMER1_COMPA_vect)
 		if(updateTags >= 12)
 		{
 			updateTags = 0;
-//			if(!isTagsRequested)
-//				Tag::setValue("deviceName", "heater");
 		}
 	}
 
