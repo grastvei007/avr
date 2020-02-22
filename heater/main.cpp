@@ -35,7 +35,7 @@ enum State
 	eSendTags
 };
 
-/**
+/**er ikke å fungere som logr
 	Setting for fan blowing air.
 **/
 struct Fan
@@ -69,6 +69,7 @@ volatile int tagNumber = 0;
 volatile int updateTags = 0;
 volatile bool on = false;
 volatile bool isTagsRequested = false;
+volatile int countDown = 10;
 
 int numPrePumps = 250; // 25 pumps 
 volatile bool isBurning = false;
@@ -84,10 +85,9 @@ void onIntValueChanged(char *aKey, int aValue);
 
 int main()
 {
+	_delay_ms(500);
 	lock = true;
-	cli();
-	USART_init();
-	sei();
+//	cli();
 	mh.init();
 	mh.setCallback(messageCallback);
 
@@ -104,7 +104,6 @@ int main()
 	pwm.setDutyCycle(Pwm::eChanPb3, 0);
 	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
-	USART_init();
 	initTimer();
 	//ouput pins
 	DDRB |= (1 << PB0);
@@ -131,6 +130,7 @@ int main()
 	pump.start();
 	pump.setSpeed(255);
 
+	USART_init();
 	sei();
 	lock = false;
 	while(true)
@@ -240,6 +240,9 @@ void init()
 
 ISR(TIMER1_COMPA_vect)
 {
+	if(countDown-- > 0)
+		return;
+	
 	if(lock)
 		return;
 	lock = true;

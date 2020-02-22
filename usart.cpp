@@ -43,12 +43,12 @@ void USART_putMessage(char *aMsg, int size)
 }
 
 
-/*void USART_init(){
+void USART_init(){
     UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
     UBRR0L = (uint8_t)(BAUD_PRESCALLER);
 
      UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
     //enable reception and RC complete interrupt
      UCSR0B |= (1<<TXEN0) | (1<<RXEN0)|(1<<RXCIE0);
-}*/
+}
 
