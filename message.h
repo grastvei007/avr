@@ -32,7 +32,7 @@ class Message
 {
 public:
     Message();
-    Message(char *aMsg, size_t aSize);
+    Message(const char *aMsg, size_t aSize);
 
 	static const int HeaderSize = 4;
 	static const int MaxKeySize = 20;
@@ -54,11 +54,11 @@ public:
      */
     int isValid();
 
-    void add(char* aKey, double aValue);
-    void add(char *aKey, float aValue);
-    void add(char* aKey, int aValue);
-	void add(char* aKey, bool aValue);
-	void add(char* aKey, char *aValue);
+    void add(const char* aKey, double aValue);
+    void add(const char *aKey, float aValue);
+    void add(const char* aKey, int aValue);
+	void add(const char* aKey, bool aValue);
+	void add(const char* aKey, const char *aValue);
 
     void finnish(); ///< prepare meassege to be transmited.
 
@@ -69,7 +69,7 @@ public:
 	/** brief Direct set the message buffer,
 		@warning replaces existing message if it exist.
 	**/
-    void setMessage( char *aMsg, size_t aMessageSize);
+    void setMessage(char *aMsg, size_t aMessageSize);
 	void print();
 private:
     void calcCheckcode();

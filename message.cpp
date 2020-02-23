@@ -24,7 +24,7 @@ Message::Message()
 }
 
 
-Message::Message(char *aMsg, size_t aSize)
+Message::Message(const char *aMsg, size_t aSize)
 {
     mIsValid = validateMessage(aMsg, aSize);
 }
@@ -59,13 +59,13 @@ int Message::isValid()
     return mIsValid;
 }
 
-void Message::add(char* aKey, double aValue)
+void Message::add(const char* aKey, double aValue)
 {
 
 }
 
 
-void Message::add(char *aKey, float aValue)
+void Message::add(const char *aKey, float aValue)
 {
     size_t keySize = strlen(aKey);
     for(int i=0; i<keySize; ++i)
@@ -87,7 +87,7 @@ void Message::add(char *aKey, float aValue)
 }
 
 
-void Message::add(char* aKey, int aValue)
+void Message::add(const char* aKey, int aValue)
 {
     size_t keySize = strlen(aKey);
     for(int i=0; i<keySize; ++i)
@@ -111,7 +111,7 @@ void Message::add(char* aKey, int aValue)
 /**
 	the value is encoded to bX where x is 0 or 1
 **/
-void Message::add(char* aKey, bool aValue)
+void Message::add(const char* aKey, bool aValue)
 {
     size_t keySize = strlen(aKey);
 
@@ -131,7 +131,7 @@ void Message::add(char* aKey, bool aValue)
 	tells the size of the value text.
 
 **/
-void Message::add(char* aKey, char *aValue)
+void Message::add(const char* aKey, const char *aValue)
 {
     size_t keySize = strlen(aKey);
     size_t valueSize = strlen(aValue);

@@ -8,31 +8,31 @@
 namespace Tag
 {
 
-void createTag(char *aName, bool aValue)
+void createTag(const char *aName, bool aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void createTag(char *aName, int aValue)
+void createTag(const char *aName, int aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void createTag(char *aName, float aValue)
+void createTag(const char *aName, float aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void createTag(char *aName, char *aValue)
+void createTag(const char *aName,const  char *aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void setValue(char *aTagName, bool aValue)
+void setValue(const char *aTagName, bool aValue)
 {
     Message msg;
     msg.init();
@@ -49,7 +49,7 @@ void setValue(char *aTagName, bool aValue)
 }
 
 
-void setValue(char *aTagName, int aValue)
+void setValue(const char *aTagName, int aValue)
 {
     Message msg;
     msg.init();
@@ -66,7 +66,7 @@ void setValue(char *aTagName, int aValue)
 }
 
 
-void setValue(char *aTagName, float aValue)
+void setValue(const char *aTagName, float aValue)
 {
     Message msg;
     msg.init();
@@ -83,7 +83,7 @@ void setValue(char *aTagName, float aValue)
 }
 
 
-void setValue(char *aTagName, char *aValue)
+void setValue(const char *aTagName, const char *aValue)
 {
     Message msg;
     msg.init();
