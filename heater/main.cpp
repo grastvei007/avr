@@ -11,6 +11,8 @@
 #include <usart.h>
 #include <pwm.h>
 #include <tag.h>
+#include <adc.h>
+
 
 #include "pump.h"
 //#define F_CPU 12000000UL
@@ -19,11 +21,11 @@ MessageHandler mh;
 MessageTranslationSenter mts;
 Pwm pwm;
 Pump pump;
+Adc adc;
 volatile bool lock;
 
 void init(); ///< init fan, and effect.
 
-//ISR(PCINT0_vect);
 
 enum State
 {
@@ -70,6 +72,7 @@ volatile int updateTags = 0;
 volatile bool on = false;
 volatile bool isTagsRequested = false;
 volatile int countDown = 10;
+volatile int adc0Value = 0;
 
 int numPrePumps = 250; // 25 pumps 
 volatile bool isBurning = false;
@@ -82,6 +85,7 @@ void requestCreateTags();
 
 void onBoolValueChanged(char *aKey, bool aValue);
 void onIntValueChanged(char *aKey, int aValue);
+void onAdcValueChanged(int aValue);
 
 int main()
 {
@@ -103,6 +107,11 @@ int main()
 	pwm.enable(Pwm::eChanPd3);
 	pwm.setDutyCycle(Pwm::eChanPb3, 0);
 	pwm.setDutyCycle(Pwm::eChanPd3, 0);
+
+	adc.init();
+	adc.setCallbackFunc(onAdcValueChanged);
+	adc.enable();
+	adc.enableChannel(Adc::eAdc0);
 
 	initTimer();
 	//ouput pins
@@ -142,6 +151,13 @@ int main()
 }
 
 
+void onAdcValueChanged(int aChannel)
+{
+	adc0Value = adc.getChannelReading(Adc::Channel(aChannel));
+	adc.readNext();
+}
+
+
 void onBoolValueChanged(char *aKey, bool aValue)
 {
 	if(strcmp(aKey, "on") == 0)
@@ -175,6 +191,11 @@ void onIntValueChanged(char *aKey, int aValue)
 		effect.newLevel = aValue;
 		effect.changed = true;
 	}
+}
+
+ISR(ADC_Vect)
+{
+	adc.valueReady();
 }
 
 
@@ -326,6 +347,8 @@ ISR(TIMER1_COMPA_vect)
 		    Tag::createTag("on", false);
 		else if(tagNumber == 4)
 			Tag::createTag("state", "sendTags");
+		else if(tagNumber == 5)
+			Tag::createTag("adc0", adc0Value);
 		else
 			state = returnState;
 		tagNumber++;
@@ -353,6 +376,7 @@ ISR(TIMER1_COMPA_vect)
 	
 		if(updateTags >= 12)
 		{
+			Tag::setValue("adc0", adc0Value);
 			updateTags = 0;
 		}
 	}
