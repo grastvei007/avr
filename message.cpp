@@ -68,7 +68,7 @@ void Message::add(const char* aKey, double aValue)
 void Message::add(const char *aKey, float aValue)
 {
     size_t keySize = strlen(aKey);
-    for(int i=0; i<keySize; ++i)
+    for(unsigned int i=0; i<keySize; ++i)
         mMessage[++mMessageSize] = aKey[i];
 
     mMessage[++mMessageSize] = ':';
@@ -90,7 +90,7 @@ void Message::add(const char *aKey, float aValue)
 void Message::add(const char* aKey, int aValue)
 {
     size_t keySize = strlen(aKey);
-    for(int i=0; i<keySize; ++i)
+    for(unsigned int i=0; i<keySize; ++i)
         mMessage[++mMessageSize] = aKey[i];
 
     mMessage[++mMessageSize] = ':';
@@ -115,7 +115,7 @@ void Message::add(const char* aKey, bool aValue)
 {
     size_t keySize = strlen(aKey);
 
-    for(int i=0; i<keySize; ++i)
+    for(unsigned int i=0; i<keySize; ++i)
         mMessage[++mMessageSize] = aKey[i];
 
     mMessage[++mMessageSize] = ':';
@@ -136,7 +136,7 @@ void Message::add(const char* aKey, const char *aValue)
     size_t keySize = strlen(aKey);
     size_t valueSize = strlen(aValue);
 	
-	for(int i=0; i<keySize; ++i)
+	for(unsigned int i=0; i<keySize; ++i)
 		mMessage[++mMessageSize] = aKey[i];
 
 	mMessage[++mMessageSize] = ':';
@@ -152,7 +152,7 @@ void Message::add(const char* aKey, const char *aValue)
 	mMessage[++mMessageSize] = sb.asByte[0];
 	mMessage[++mMessageSize] = sb.asByte[1];
 
-	for(int i=0; i<valueSize; ++i)
+	for(unsigned int i=0; i<valueSize; ++i)
 		mMessage[++mMessageSize] = aValue[i];
 }
 
@@ -207,7 +207,7 @@ void Message::calcCheckcode()
     //printf("calc check code\n");
     int n = 0;
     int r = 0;
-    for(int i=0; i<mMessageSize+1; ++i)
+    for(unsigned int i=0; i<mMessageSize+1; ++i)
     {
         if(i == mMessageSize -1)
             continue;
@@ -239,7 +239,7 @@ int Message::validateMessage(const char *aMsg, size_t aSize)
     int msgSize = atoi(buffer);
 
     int n = 0;
-    for(int i=0; i<msgSize; ++i)
+    for(unsigned int i=0; i<msgSize; ++i)
     {
         if(i != msgSize-2)
             n += aMsg[i];
@@ -253,7 +253,7 @@ int Message::validateMessage(const char *aMsg, size_t aSize)
         return -3;
 
     mMessageSize = msgSize;
-	for(int i=0; i<msgSize; ++i)
+	for(unsigned int i=0; i<msgSize; ++i)
 		mMessage[i] = aMsg[i];
     return 1;
 }
@@ -262,7 +262,7 @@ int Message::validateMessage(const char *aMsg, size_t aSize)
 void Message::print()
 {
 	printf("\nMessage size: %i\n", mMessageSize);
-	for(int i=0; i<mMessageSize; ++i)
+	for(unsigned int i=0; i<mMessageSize; ++i)
 	{
 		printf("%c", mMessage[i]);
 	}
@@ -276,6 +276,6 @@ int Message::getSize()
 
 void Message::getMessageData(char *msg)
 {
-    for(int i=0; i<mMessageSize+1; ++i)
+    for(unsigned int i=0; i<mMessageSize+1; ++i)
         msg[i] = mMessage[i];
 }
