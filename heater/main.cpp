@@ -135,7 +135,7 @@ int main()
 
 //	PCMSK0 |= (1 << PCINT1);
 //	PCICR |= (1 << PCIE0);
-
+	pump.init();
 	pump.start();
 	pump.setSpeed(255);
 
