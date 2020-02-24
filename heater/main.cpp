@@ -279,6 +279,7 @@ ISR(TIMER1_COMPA_vect)
 		if(numPrePumps <= 0)
 		{
 			onBoolValueChanged("burning", false);
+			onBoolValueChanged("on", false);
 			state = eStarting;
 			pwm.setDutyCycle(Pwm::eChanPd3, 250);
 		}
