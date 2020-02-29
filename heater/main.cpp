@@ -264,8 +264,11 @@ void init()
 
 ISR(TIMER1_COMPA_vect)
 {
-	if(countDown-- > 0)
+	if(countDown > 0)
+	{
+		countDown--;
 		return;
+	}
 	
 	if(lock)
 		return;

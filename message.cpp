@@ -196,6 +196,11 @@ int Message::getMessage(char *&rMessage)
 }
 
 
+char* Message::getMessagePtr()
+{
+	return mMessage;
+}
+
 void Message::setMessage(char *aMessage, size_t aMessageSize)
 {
 	mIsValid = validateMessage(aMessage, aMessageSize);
@@ -204,7 +209,6 @@ void Message::setMessage(char *aMessage, size_t aMessageSize)
 
 void Message::calcCheckcode()
 {
-    //printf("calc check code\n");
     int n = 0;
     int r = 0;
     for(unsigned int i=0; i<mMessageSize+1; ++i)
@@ -213,11 +217,8 @@ void Message::calcCheckcode()
             continue;
 
         n += (int)mMessage[i];
-        printf("c(%i) %c\n", mMessage[i], mMessage[i]);
     }
-    printf("\ndone\n");
     r = n % 256;
-    //printf("sum: %i, r=%i\n", n,r);
     mMessage[mMessageSize-1] = (char)r;
 }
 

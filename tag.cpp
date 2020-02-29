@@ -39,13 +39,9 @@ void setValue(const char *aTagName, bool aValue)
     msg.add(aTagName, aValue);
     msg.finnish();
     int size = msg.getSize() + 1;
-    char *data = (char*)malloc(size);
-    msg.getMessageData(data);
 
-    USART_putMessage(data, size);
+    USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
-    free(data);
-
 }
 
 
@@ -56,13 +52,9 @@ void setValue(const char *aTagName, int aValue)
     msg.add(aTagName, aValue);
     msg.finnish();
     int size = msg.getSize() + 1;
-    char *data = (char*)malloc(size);
-    msg.getMessageData(data);
 
-    USART_putMessage(data, size);
+    USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
-    free(data);
-
 }
 
 
@@ -73,13 +65,9 @@ void setValue(const char *aTagName, float aValue)
     msg.add(aTagName, aValue);
     msg.finnish();
     int size = msg.getSize() + 1;
-    char *data = (char*)malloc(size);
-    msg.getMessageData(data);
 
-    USART_putMessage(data, size);
+    USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
-    free(data);
-
 }
 
 
@@ -90,13 +78,9 @@ void setValue(const char *aTagName, const char *aValue)
     msg.add(aTagName, aValue);
     msg.finnish();
     int size = msg.getSize() + 1;
-    char *data = (char*)malloc(size);
-    msg.getMessageData(data);
 
-    USART_putMessage(data, size);
+    USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
-    free(data);
-
 }
 
 }
