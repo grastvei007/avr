@@ -75,10 +75,13 @@ void MessageHandler::run()
     if(!msg)
         return;
 
-    if(mCallback)
+    if(mCallback && msg)
         mCallback(msg);
     else
-        free(msg);
+	{
+		if(msg)
+	        free(msg);
+	}
 }
 
 
