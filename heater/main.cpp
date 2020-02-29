@@ -91,6 +91,8 @@ int main()
 {
 	_delay_ms(500);
 	lock = true;
+	USART_init();
+	sei();
 //	cli();
 	mh.init();
 	mh.setCallback(messageCallback);
@@ -108,12 +110,12 @@ int main()
 	pwm.setDutyCycle(Pwm::eChanPb3, 0);
 	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
-	adc.init();
+/*	adc.init();
 	adc.setCallbackFunc(onAdcValueChanged);
 	adc.enable();
 	adc.enableChannel(Adc::eAdc0);
-
-	initTimer();
+*/
+//	initTimer();
 	//ouput pins
 	DDRB |= (1 << PB0);
 	DDRB |= (1 << PB1);
@@ -136,10 +138,11 @@ int main()
 //	PCMSK0 |= (1 << PCINT1);
 //	PCICR |= (1 << PCIE0);
 	pump.init();
-	pump.start();
-	pump.setSpeed(255);
+//	pump.start();
+//	pump.setSpeed(255);
 
-	USART_init();
+//	USART_init();
+	initTimer();
 	sei();
 	lock = false;
 	while(true)
