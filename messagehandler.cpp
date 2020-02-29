@@ -34,7 +34,7 @@ MessageHandler::~MessageHandler()
 
 void MessageHandler::init()
 {
-	mBufferEnd = 0;
+	mBufferEnd = BUFFER_SIZE - 1;
 	mBufferSize = BUFFER_SIZE;
   //  mBuffer = (char*)malloc(aBufferSize);
     mCallback = NULL;
@@ -53,14 +53,11 @@ void MessageHandler::setCallback(funcPtr func)
 
 void MessageHandler::insertChar(char c)
 {
+	mBufferEnd++;
+	if(mBufferEnd >= BUFFER_SIZE)
+		mBufferEnd -= BUFFER_SIZE;
 	
-	mBuffer[mBufferEnd++] = c;
-	if(mBufferEnd >= mBufferSize)
-	{
-//		for(int i=0; i<mBufferSize; ++i)
-//			mBuffer[i] = '0';
- 		mBufferEnd = 0;
-	}
+	mBuffer[mBufferEnd] = c;
 }
 
 
@@ -75,10 +72,13 @@ void MessageHandler::run()
     if(!msg)
         return;
 
-    if(mCallback)
+    if(mCallback && msg)
         mCallback(msg);
     else
-        free(msg);
+	{
+		if(msg)
+	        free(msg);
+	}
 }
 
 
@@ -136,27 +136,32 @@ int MessageHandler::find(char *aStr)
 	if(len <= 0)
 		return -1;
 
-	int startPos =  (mBufferEnd );// % bufferSize();
+	int startPos = mBufferEnd + 1;
+	if(startPos >= BUFFER_SIZE)
+		startPos = 0;
+
 	for(unsigned int i=0; i<BUFFER_SIZE; ++i)
 	{
-		int idx = startPos + i;
-		if(idx > BUFFER_SIZE)
-			idx -= BUFFER_SIZE;
-		if(mBuffer[idx] == aStr[0])
+		int index = startPos + i;
+		if(index >= BUFFER_SIZE)
+			index -= BUFFER_SIZE;
+
+		if(mBuffer[index] == aStr[0])
 		{
 			bool found = true;
-			for(int k = 1; k<len; ++k)
-			{	
-				int t = idx+k;
-				if(t > BUFFER_SIZE)
-					t -= BUFFER_SIZE;
-				if(mBuffer[t] != aStr[k])
+			for(int k=1; k<len; ++k)
+			{
+				int index2 = index + k;
+				if(index2 >= BUFFER_SIZE)
+					index2 -= BUFFER_SIZE;
+
+				if(mBuffer[index2] != aStr[k])
 				{
 					found = false;
 				}
 			}
 			if(found)
-				return idx;
+				return index;
 		}
 	}
 	return -1;
@@ -175,7 +180,7 @@ int MessageHandler::getMessage(Message *& rMessage, int aStartPosInBuffer)
 	sizeBuffer[3] = mBuffer[(aStartPosInBuffer+7)%BUFFER_SIZE];
 
 	int size = atoi(sizeBuffer);
-	if(size  <= 10)
+	if(size  <= 10 || size >= BUFFER_SIZE)
 		return -1;
 	
     char msg[size];

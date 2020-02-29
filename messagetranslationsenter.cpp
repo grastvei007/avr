@@ -70,13 +70,13 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 		return;
 	}
 
-	char *msg = NULL;
+	char msg[100]; // = NULL;
 //    int size = aMsg->getMessage(msg);
 	int size = aMsg->getSize() + 1;
-	msg = (char*)malloc(size);
+//	msg = (char*)malloc(size);
 	aMsg->getMessageData(msg);
 //	fprintf(stderr, "s", msg);
-	if(!msg || size < 0)
+	if(size < 0)
 		return;
 	
 	int pos = Message::HeaderSize+4;
@@ -89,7 +89,7 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 			mDebug("translatePair");
 		pos += translateKeyValuePair(msg, pos);
 	}
-	free(msg);	
+//	free(msg);	
 }
 
 int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)

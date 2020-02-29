@@ -64,6 +64,7 @@ public:
 
     int getSize();
     void getMessageData(char *msg);
+	char* getMessagePtr();
 
     int getMessage( char *&rMessage); ///< get the message
 	/** brief Direct set the message buffer,

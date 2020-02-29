@@ -91,6 +91,8 @@ int main()
 {
 	_delay_ms(500);
 	lock = true;
+	USART_init();
+	sei();
 //	cli();
 	mh.init();
 	mh.setCallback(messageCallback);
@@ -108,38 +110,23 @@ int main()
 	pwm.setDutyCycle(Pwm::eChanPb3, 0);
 	pwm.setDutyCycle(Pwm::eChanPd3, 0);
 
-	adc.init();
+/*	adc.init();
 	adc.setCallbackFunc(onAdcValueChanged);
 	adc.enable();
 	adc.enableChannel(Adc::eAdc0);
+*/
 
-	initTimer();
+
 	//ouput pins
-	DDRB |= (1 << PB0);
+//	DDRB |= (1 << PB0);
 	DDRB |= (1 << PB1);
-	DDRB |= (1 << PB2);
-//	DDRB |= (1 << PB3);
-//	DDRB |= (1 << PB4);
-//	DDRB |= (1 << PB5);
 
-//	DDRD |= (1 << PD3);
-
-	//input pins
-//	DDRB &= ~(1 << PB1);
-
-/*	DDRD &= ~(1 << PD2);
-	DDRD &= ~(1 << PD4);
-	DDRD &= ~(1 << PD5);
-	DDRD &= ~(1 << PD6);
-	DDRD &= ~(1 << PD7);*/
-
-//	PCMSK0 |= (1 << PCINT1);
-//	PCICR |= (1 << PCIE0);
 	pump.init();
 	pump.start();
-	pump.setSpeed(255);
+//	pump.setSpeed(255);
 
-	USART_init();
+//	USART_init();
+	initTimer();
 	sei();
 	lock = false;
 	while(true)
@@ -162,10 +149,10 @@ void onBoolValueChanged(char *aKey, bool aValue)
 {
 	if(strcmp(aKey, "on") == 0)
 	{
-		if(aValue)
+	/*	if(aValue)
 			PORTB &= ~(1<<PB0);
 		else
-			PORTB |= (1<<PB0);
+			PORTB |= (1<<PB0);*/
 		on = aValue;
 	}
 	else if(strcmp(aKey, "burning") == 0)
@@ -261,8 +248,11 @@ void init()
 
 ISR(TIMER1_COMPA_vect)
 {
-	if(countDown-- > 0)
+	if(countDown > 0)
+	{
+		countDown--;
 		return;
+	}
 	
 	if(lock)
 		return;
@@ -278,6 +268,8 @@ ISR(TIMER1_COMPA_vect)
 		numPrePumps--;
 		if(numPrePumps <= 0)
 		{
+//			pump.start();
+//			pump.setSpeed(255);
 			onBoolValueChanged("burning", false);
 			onBoolValueChanged("on", false);
 			state = eStarting;
@@ -387,7 +379,7 @@ ISR(TIMER1_COMPA_vect)
 }
 
 
-ISR(PCINT0_vect)
+/*ISR(PCINT0_vect)
 {
 	if(!PINB & (1 << PINB1))
 	{
@@ -395,4 +387,4 @@ ISR(PCINT0_vect)
 	}
 
 }
-
+*/
