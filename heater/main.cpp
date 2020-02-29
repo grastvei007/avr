@@ -115,30 +115,14 @@ int main()
 	adc.enable();
 	adc.enableChannel(Adc::eAdc0);
 */
-//	initTimer();
+
+
 	//ouput pins
-	DDRB |= (1 << PB0);
+//	DDRB |= (1 << PB0);
 	DDRB |= (1 << PB1);
-	DDRB |= (1 << PB2);
-//	DDRB |= (1 << PB3);
-//	DDRB |= (1 << PB4);
-//	DDRB |= (1 << PB5);
 
-//	DDRD |= (1 << PD3);
-
-	//input pins
-//	DDRB &= ~(1 << PB1);
-
-/*	DDRD &= ~(1 << PD2);
-	DDRD &= ~(1 << PD4);
-	DDRD &= ~(1 << PD5);
-	DDRD &= ~(1 << PD6);
-	DDRD &= ~(1 << PD7);*/
-
-//	PCMSK0 |= (1 << PCINT1);
-//	PCICR |= (1 << PCIE0);
 	pump.init();
-//	pump.start();
+	pump.start();
 //	pump.setSpeed(255);
 
 //	USART_init();
@@ -165,10 +149,10 @@ void onBoolValueChanged(char *aKey, bool aValue)
 {
 	if(strcmp(aKey, "on") == 0)
 	{
-		if(aValue)
+	/*	if(aValue)
 			PORTB &= ~(1<<PB0);
 		else
-			PORTB |= (1<<PB0);
+			PORTB |= (1<<PB0);*/
 		on = aValue;
 	}
 	else if(strcmp(aKey, "burning") == 0)
@@ -284,6 +268,8 @@ ISR(TIMER1_COMPA_vect)
 		numPrePumps--;
 		if(numPrePumps <= 0)
 		{
+//			pump.start();
+//			pump.setSpeed(255);
 			onBoolValueChanged("burning", false);
 			onBoolValueChanged("on", false);
 			state = eStarting;
@@ -393,7 +379,7 @@ ISR(TIMER1_COMPA_vect)
 }
 
 
-ISR(PCINT0_vect)
+/*ISR(PCINT0_vect)
 {
 	if(!PINB & (1 << PINB1))
 	{
@@ -401,4 +387,4 @@ ISR(PCINT0_vect)
 	}
 
 }
-
+*/

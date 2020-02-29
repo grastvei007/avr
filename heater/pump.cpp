@@ -18,8 +18,8 @@ void Pump::init()
 {
 	mIsActive = false;
 	mTime = 0.0;
-	mMinSpeed = 5.0;
-	mMaxSpeed = 1.0;
+	mMinSpeed = 1.0;
+	mMaxSpeed = 5.0;
 	mCurrentSpeed = 2.0;
 	mIsOn = false;
 
@@ -72,8 +72,8 @@ void Pump::update(float aEt)
 	}
 
 
-	if(mTime > mMinSpeed)
-		mTime = 0.0;
+//	if(mTime > mMaxSpeed)
+//		mTime = 0.0;
 }
 
 
