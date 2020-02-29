@@ -78,6 +78,7 @@ int numPrePumps = 250; // 25 pumps
 volatile bool isBurning = false;
 
 void initTimer();
+void turnGlowPlugOn(bool aOn);
 
 void messageCallback(Message *&msg);
 void requestDeviceName();
@@ -137,6 +138,17 @@ int main()
 	return 0;
 }
 
+void turnGlowPlugOn(bool aOn)
+{
+	if(aOn)
+	{
+		PORTB |= (1 << PB1);
+	}
+	else
+	{
+		PORTB &= ~(1 << PB1);
+	}
+}
 
 void onAdcValueChanged(int aChannel)
 {
@@ -149,19 +161,11 @@ void onBoolValueChanged(char *aKey, bool aValue)
 {
 	if(strcmp(aKey, "on") == 0)
 	{
-	/*	if(aValue)
-			PORTB &= ~(1<<PB0);
-		else
-			PORTB |= (1<<PB0);*/
-		on = aValue;
+		on = !aValue;
 	}
 	else if(strcmp(aKey, "burning") == 0)
 	{
 		isBurning = aValue;
-		if(aValue)
-			PORTB &= ~(1<<PB1);
-		else
-			PORTB |= (1 << PB1);
 	}
 }
 
@@ -192,7 +196,6 @@ void messageCallback(Message *&msg)
 	msg->destroy();
 	free(msg);	
 }
-
 
 ISR(USART_RX_vect)
 {
@@ -265,15 +268,22 @@ ISR(TIMER1_COMPA_vect)
 
 	if(state == eInit)
 	{
+	//	Tag::setValue("state", "init");
 		numPrePumps--;
 		if(numPrePumps <= 0)
 		{
 //			pump.start();
 //			pump.setSpeed(255);
-			onBoolValueChanged("burning", false);
-			onBoolValueChanged("on", false);
+//			Tag::setValue("on", false);
+//			Tag::setValue("burning", false);
+			isBurning = false;
+			on = false;
 			state = eStarting;
 			pwm.setDutyCycle(Pwm::eChanPd3, 250);
+			effect.currentLevel = 9;
+			effect.newLevel = 9;
+			turnGlowPlugOn(true);
+		//	Tag::setValue("state", "starting");
 		}
 	}
 	else if(state == eStarting)
@@ -282,10 +292,16 @@ ISR(TIMER1_COMPA_vect)
 		if(isBurning)
 		{
 			state = eRuning;
-			Tag::setValue("on", true);
+	//		Tag::setValue("on", true);
 			on = true;
-			pwm.setDutyCycle(Pwm::eChanPb3, 150);
-			pwm.setDutyCycle(Pwm::eChanPd3, 150);
+			effect.currentLevel = 6;
+			effect.newLevel = 6;
+			effect.changed = true;
+			fan.currentLevel = 6;
+			fan.newLevel = 6;
+			fan.changed = true;
+			turnGlowPlugOn(false);
+		//	Tag::setValue("state", "running");
 		}
 
 	}
@@ -300,6 +316,7 @@ ISR(TIMER1_COMPA_vect)
 			pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
 			fan.changed = false;
 			pump.setSpeed(25*fan.currentLevel);
+	//		Tag::setValue("statusFan", fan.currentLevel);
 		}
 		if(effect.changed)
 		{
@@ -308,11 +325,13 @@ ISR(TIMER1_COMPA_vect)
 			pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
 			effect.changed = false;
 			pump.setSpeed(25*fan.currentLevel);
+	//		Tag::setValue("statusHeat", effect.currentLevel);
 		}
 		if(!on)
 		{
 			pump.stop();
 			state = eStoping;
+			Tag::setValue("state", "Stopping");
 		}
 	}
 	else if(state == eStoping)
@@ -322,6 +341,7 @@ ISR(TIMER1_COMPA_vect)
 			pwm.setDutyCycle(Pwm::eChanPb3, 0);
 			pwm.setDutyCycle(Pwm::eChanPd3, 0);
 			state = eStoped;
+			Tag::setValue("state", "Stoped");
 		}
 	}
 	else if(state == eStoped)
@@ -339,15 +359,19 @@ ISR(TIMER1_COMPA_vect)
 		else if(tagNumber == 3)
 		    Tag::createTag("on", false);
 		else if(tagNumber == 4)
-			Tag::createTag("state", "sendTags");
+			Tag::createTag("state", "init");
 		else if(tagNumber == 5)
 			Tag::createTag("adc0", adc0Value);
+		else if(tagNumber == 6)
+			Tag::createTag("statusHeat", effect.currentLevel);
+		else if(tagNumber == 7)
+			Tag::createTag("statusFan", fan.currentLevel);
 		else
 			state = returnState;
 		tagNumber++;
 	}
 
-	if(updateTags >= 10)
+/*	if(updateTags >= 10)
 	{
 		if(state == eInit)
 			Tag::setValue("state", "init");
@@ -361,20 +385,24 @@ ISR(TIMER1_COMPA_vect)
 			Tag::setValue("state", "stoped");
 		else if(state == eSendTags)
 			Tag::setValue("state", "sendTags");
-
-		if(updateTags == 11)
+*/
+		/*if(updateTags == 11)
 			Tag::setValue("on", on);
 		else if(updateTags == 12)
-			Tag::setValue("burning", isBurning);
+			Tag::setValue("burning", isBurning);*/
+/*		if(updateTags == 20)
+			Tag::setValue("statusHeat", effect.currentLevel);
+		else if(updateTags == 30)
+			Tag::setValue("statusFan", fan.currentLevel);
 	
-		if(updateTags >= 12)
+		if(updateTags >= 40)
 		{
 			Tag::setValue("adc0", adc0Value);
 			updateTags = 0;
 		}
 	}
 
-	updateTags++;
+	updateTags++;*/
 	lock = false;
 }
 

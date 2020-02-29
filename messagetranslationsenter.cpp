@@ -64,32 +64,22 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 {
 	if(aMsg == NULL)
 	{
-		if(mDebug)
-			mDebug("No msg");
-		//fprintf(stderr, "No msg");
 		return;
 	}
 
-	char msg[100]; // = NULL;
-//    int size = aMsg->getMessage(msg);
+	char msg[100];
 	int size = aMsg->getSize() + 1;
-//	msg = (char*)malloc(size);
 	aMsg->getMessageData(msg);
-//	fprintf(stderr, "s", msg);
 	if(size < 0)
 		return;
 	
 	int pos = Message::HeaderSize+4;
-	for(;;)
-	{
-		if( (size-pos) <= 2)
-			break;
-		//fprintf(stderr, "translatepair\n");
-		if(mDebug)
-			mDebug("translatePair");
+//	for(;;)
+//	{
+//		if( (size-pos) <= 2)
+//			break;
 		pos += translateKeyValuePair(msg, pos);
-	}
-//	free(msg);	
+//	}
 }
 
 int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
