@@ -312,19 +312,25 @@ ISR(TIMER1_COMPA_vect)
 	{
 			fan.currentLevel = fan.newLevel;
 
-			uint8_t pwmValue = 100 + (fan.currentLevel*15);
+			uint8_t pwmValue = 150 + (fan.currentLevel*10);
+			if(fan.currentLevel > 10)
+					pwmValue = 255;
 			pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
 			fan.changed = false;
-			pump.setSpeed(25*fan.currentLevel);
 	//		Tag::setValue("statusFan", fan.currentLevel);
 		}
 		if(effect.changed)
 		{
 			effect.currentLevel = effect.newLevel;
-			uint8_t pwmValue = 100 + (effect.currentLevel*15);
+			uint8_t pwmValue = 150 + (effect.currentLevel*10);
+			if(effect.currentLevel > 10)
+			{
+				pwmValue = 255;
+				effect.currentLevel = 10;
+			}
 			pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
 			effect.changed = false;
-			pump.setSpeed(25*fan.currentLevel);
+			pump.setSpeed(25*effect.currentLevel);
 	//		Tag::setValue("statusHeat", effect.currentLevel);
 		}
 		if(!on)
