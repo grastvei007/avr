@@ -14,7 +14,8 @@ CFLAGS = $(COMMON)
 CFLAGS += -Wall -Os -MD -MP -MT -MF
 
 ## Objects that must be built in order to link
-OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o tag.o i2c.o ssd1306.o
+OBJECTS := adc.o pwm.o message.o messagehandler.o messagetranslationsenter.o usart.o portb.o tag.o i2c.o ssd1306.o motorencoder.o \
+            circularbuffer.o
 
 ## Build
 all: $(TARGET)
@@ -48,6 +49,12 @@ i2c.o: i2c.cpp
 	$(CC) $(INCLUDE) $(CFLAGS) -c $<
 
 ssd1306.o: ssd1306.cpp
+	$(CC) $(INCLUDE) $(CFLAGS) -c $<
+
+motorencoder.o: motorencoder.cpp
+	$(CC) $(INCLUDE) $(CFLAGS) -c $<
+
+circularbuffer.o: circularbuffer.cpp
 	$(CC) $(INCLUDE) $(CFLAGS) -c $<
 
 ## Archive into a library file (.a)
