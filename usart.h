@@ -21,11 +21,16 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #define BAUD_PRESCALLER (((F_CPU / (BAUDRATE * 12UL))) - 1)
 
 
+
 void USART_init(void);
+// UnBuffered sending
 void USART_send(char data);
 void USART_putstring(char* StringPtr);
 void USART_putMessage(char *aMsg, int size);
 
+//Buffered sending
+void USART_buffer_append(char *msg, unsigned int size); ///< append string to buffer
+void USART_buffer_send(); ///< send first char from buffer
 
 #endif
 

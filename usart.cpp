@@ -14,15 +14,19 @@ You should have received a copy of the GNU General Public License
 along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "usart.h"
+#include "circularbuffer.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+
+
+CircularBuffer transmitBuffer = buffer_create();
+
+
 void USART_send(char data){
-
- while(!(UCSR0A & (1<<UDRE0)));
- UDR0 = data;
-
+    while(!(UCSR0A & (1<<UDRE0)));
+        UDR0 = data;
 }
 
 void USART_putstring(char* StringPtr){
@@ -50,5 +54,24 @@ void USART_init(){
      UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
     //enable reception and RC complete interrupt
      UCSR0B |= (1<<TXEN0) | (1<<RXEN0)|(1<<RXCIE0);
+
+}
+
+
+void USART_buffer_append(char *msg, unsigned int size)
+{
+    for(int i=0; i<size; ++i)
+    {
+        buffer_write(&transmitBuffer, msg[i]);
+    }
+}
+
+
+void USART_buffer_send()
+{
+    while (!buffer_empty(&transmitBuffer))
+    {
+        char c = buffer_read(&transmitBuffer);
+    }
 }
 
