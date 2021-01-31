@@ -87,7 +87,6 @@ int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 	//fprintf(stderr, "startpos, %i", aStartPos);
 	char keyBuffer[Message::MaxKeySize] = {'\0'};
 	int steps = 0;
-	int startPosValue = 0;
 
 	for(int i=aStartPos; ; i++)
 	{
