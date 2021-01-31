@@ -8,31 +8,31 @@
 namespace Tag
 {
 
-void createTag(const char *aName, bool aValue)
+void createTag(char *aName, bool aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void createTag(const char *aName, int aValue)
+void createTag(char *aName, int aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void createTag(const char *aName, float aValue)
+void createTag(char *aName, float aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void createTag(const char *aName,const  char *aValue)
+void createTag(char *aName, char *aValue)
 {
 	setValue(aName, aValue);
 }
 
 
-void setValue(const char *aTagName, bool aValue)
+void setValue(char *aTagName, bool aValue)
 {
     Message msg;
     msg.init();
@@ -40,12 +40,13 @@ void setValue(const char *aTagName, bool aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
+//	USART_buffer_append(msg.getMessagePtr(), size);
     USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
 }
 
 
-void setValue(const char *aTagName, int aValue)
+void setValue(char *aTagName, int aValue)
 {
     Message msg;
     msg.init();
@@ -53,12 +54,13 @@ void setValue(const char *aTagName, int aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
+//	USART_buffer_append(msg.getMessagePtr(), size);
     USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
 }
 
 
-void setValue(const char *aTagName, float aValue)
+void setValue(char *aTagName, float aValue)
 {
     Message msg;
     msg.init();
@@ -66,12 +68,13 @@ void setValue(const char *aTagName, float aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
+//	USART_buffer_append(msg.getMessagePtr(), size);
     USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
 }
 
 
-void setValue(const char *aTagName, const char *aValue)
+void setValue(char *aTagName, char *aValue)
 {
     Message msg;
     msg.init();
@@ -79,6 +82,7 @@ void setValue(const char *aTagName, const char *aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
+//	USART_buffer_append(msg.getMessagePtr(), size);
     USART_putMessage(msg.getMessagePtr(), size);
     msg.destroy();
 }
