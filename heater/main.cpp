@@ -312,7 +312,7 @@ ISR(TIMER1_COMPA_vect)
 	{
 			fan.currentLevel = fan.newLevel;
 
-			uint8_t pwmValue = 150 + (fan.currentLevel*10);
+			uint8_t pwmValue = 100 + (fan.currentLevel*15);
 			if(fan.currentLevel > 10)
 					pwmValue = 255;
 			pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
@@ -322,7 +322,7 @@ ISR(TIMER1_COMPA_vect)
 		if(effect.changed)
 		{
 			effect.currentLevel = effect.newLevel;
-			uint8_t pwmValue = 150 + (effect.currentLevel*10);
+			uint8_t pwmValue = 100 + (effect.currentLevel*15);
 			if(effect.currentLevel > 10)
 			{
 				pwmValue = 255;
@@ -407,8 +407,8 @@ ISR(TIMER1_COMPA_vect)
 			updateTags = 0;
 		}
 	}
-
-	updateTags++;*/
+	*/
+	USART_buffer_send(); // send one char from the buffer
 	lock = false;
 }
 
