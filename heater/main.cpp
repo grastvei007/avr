@@ -43,6 +43,7 @@ int main()
 //	USART_init();
 	initTimer();
 	sei();
+	init();
 	lock = false;
 	while(true)
 	{
@@ -205,7 +206,7 @@ ISR(TIMER1_COMPA_vect)
 
 		if(isBurning)
 		{
-			state = eRuning;
+			state = eRunning;
 	//		Tag::setValue("on", true);
 			on = true;
 			effect.currentLevel = 6;
@@ -219,52 +220,51 @@ ISR(TIMER1_COMPA_vect)
 		}
 
 	}
-	else if(state == eRuning)
+	else if(state == eRunning)
 	{
+        if(fan.changed)
+        {
+            fan.currentLevel = fan.newLevel;
 
-	if(fan.changed)
-	{
-			fan.currentLevel = fan.newLevel;
-
-			uint8_t pwmValue = 100 + (fan.currentLevel*15);
-			if(fan.currentLevel > 10)
-					pwmValue = 255;
-			pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
-			fan.changed = false;
-	//		Tag::setValue("statusFan", fan.currentLevel);
-		}
-		if(effect.changed)
-		{
-			effect.currentLevel = effect.newLevel;
-			uint8_t pwmValue = 100 + (effect.currentLevel*15);
-			if(effect.currentLevel > 10)
-			{
-				pwmValue = 255;
-				effect.currentLevel = 10;
-			}
-			pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
-			effect.changed = false;
-			pump.setSpeed(25*effect.currentLevel);
-	//		Tag::setValue("statusHeat", effect.currentLevel);
-		}
+            uint8_t pwmValue = 100 + (fan.currentLevel*15);
+            if(fan.currentLevel > 10)
+                    pwmValue = 255;
+            pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
+            fan.changed = false;
+    //		Tag::setValue("statusFan", fan.currentLevel);
+        }
+        if(effect.changed)
+        {
+            effect.currentLevel = effect.newLevel;
+            uint8_t pwmValue = 100 + (effect.currentLevel*15);
+            if(effect.currentLevel > 10)
+            {
+                pwmValue = 255;
+                effect.currentLevel = 10;
+            }
+            pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
+            effect.changed = false;
+            pump.setSpeed(25*effect.currentLevel);
+    //		Tag::setValue("statusHeat", effect.currentLevel);
+        }
 		if(!on)
 		{
 			pump.stop();
-			state = eStoping;
+			state = eStopping;
 			Tag::setValue("state", "Stopping");
 		}
 	}
-	else if(state == eStoping)
+	else if(state == eStopping)
 	{
 		if(!isBurning)
 		{
 			pwm.setDutyCycle(Pwm::eChanPb3, 0);
 			pwm.setDutyCycle(Pwm::eChanPd3, 0);
-			state = eStoped;
-			Tag::setValue("state", "Stoped");
+			state = eStopped;
+			Tag::setValue("state", "Stopped");
 		}
 	}
-	else if(state == eStoped)
+	else if(state == eStopped)
 	{
 
 	}
@@ -291,37 +291,6 @@ ISR(TIMER1_COMPA_vect)
 		tagNumber++;
 	}
 
-/*	if(updateTags >= 10)
-	{
-		if(state == eInit)
-			Tag::setValue("state", "init");
-		else if(state == eStarting)
-			Tag::setValue("state", "starting");
-		else if(state == eRuning)
-			Tag::setValue("state", "running");
-		else if(state == eStoping)
-			Tag::setValue("state", "stoping");
-		else if(state == eStoped)
-			Tag::setValue("state", "stoped");
-		else if(state == eSendTags)
-			Tag::setValue("state", "sendTags");
-*/
-		/*if(updateTags == 11)
-			Tag::setValue("on", on);
-		else if(updateTags == 12)
-			Tag::setValue("burning", isBurning);*/
-/*		if(updateTags == 20)
-			Tag::setValue("statusHeat", effect.currentLevel);
-		else if(updateTags == 30)
-			Tag::setValue("statusFan", fan.currentLevel);
-	
-		if(updateTags >= 40)
-		{
-			Tag::setValue("adc0", adc0Value);
-			updateTags = 0;
-		}
-	}
-	*/
 	USART_buffer_send(); // send one char from the buffer
 	lock = false;
 }

@@ -26,9 +26,35 @@ MessageTranslationSenter mts;
 Pwm pwm;
 Pump pump;
 Adc adc;
-volatile bool lock;
+
+
+struct Motor //Fan
+{
+    volatile int newLevel;
+    volatile bool changed;
+    volatile int currentLevel;
+    int minLevel;
+    int maxLevel;
+    int pwmMin;
+    int pwmMax;
+};
+
+Motor fan;
+Motor effect;
+
+enum State
+{
+    eInit,
+    eStarting,
+    eRunning,
+    eStopping,
+    eStopped,
+    eSendTags
+};
+
 volatile State state = eInit;
-volatile State returnState = eRuning;
+volatile State returnState = eRunning;
+volatile bool lock;
 volatile int tagNumber = 0;
 volatile int updateTags = 0;
 volatile bool on = false;
@@ -39,43 +65,6 @@ volatile int adc0Value = 0;
 int numPrePumps = 250; // 25 pumps
 volatile bool isBurning = false;
 
-/**er ikke å fungere som logr
-	Setting for fan blowing air.
-**/
-struct Fan
-{
-    volatile int newLevel;
-    volatile bool changed;
-    volatile int currentLevel;
-    int minLevel;
-    int maxLevel;
-    int pwmMin;
-    int pwmMax;
-}fan;
-
-/**
-	Settings for the heat, airinlet and pump speed.
-**/
-struct Effect
-{
-    volatile int newLevel;
-    volatile bool changed;
-    volatile int currentLevel;
-    int minLevel;
-    int maxLevel;
-    int pwmMin;
-    int pwmMax;
-}effect;
-
-enum State
-{
-    eInit,
-    eStarting,
-    eRuning,
-    eStoping,
-    eStoped,
-    eSendTags
-};
 
 void init(); ///< init fan, and effect.
 void initTimer();
