@@ -22,6 +22,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 
 
+
 void USART_init(void);
 // UnBuffered sending
 void USART_send(char data);
@@ -33,4 +34,3 @@ void USART_buffer_append(char *msg, unsigned int size); ///< append string to bu
 void USART_buffer_send(); ///< send first char from buffer
 
 #endif
-
