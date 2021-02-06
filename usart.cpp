@@ -77,8 +77,8 @@ void USART_init()
     UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
     UBRR0L = (uint8_t)(BAUD_PRESCALLER);
 
-     //UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
-    UCSR0C = ASYNCHRONOUS | PARITY_MODE | STOP_BIT | DATA_BIT;
+     UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
+   // UCSR0C = ASYNCHRONOUS | PARITY_MODE | STOP_BIT | DATA_BIT;
     //enable reception and RC complete interrupt
      UCSR0B |= (1<<TXEN0) | (1<<RXEN0)|(1<<RXCIE0);
 

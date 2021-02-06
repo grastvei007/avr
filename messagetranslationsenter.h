@@ -64,7 +64,7 @@ class MessageTranslationSenter
 	private:
 		int translateKeyValuePair(char* aMsg, int aStartPos);
 
-		bool translateBool(char *aBool);
+		bool translateBool(char aBool);
 		int translateInt(char *aInt);
 		float translateFloat(char *aFloat);
 		short translateShort(char *aShort);

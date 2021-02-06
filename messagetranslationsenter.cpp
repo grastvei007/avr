@@ -84,11 +84,10 @@ void MessageTranslationSenter::translateMessage(Message *aMsg)
 
 int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 {
-	//fprintf(stderr, "startpos, %i", aStartPos);
 	char keyBuffer[Message::MaxKeySize] = {'\0'};
 	int steps = 0;
 
-	for(int i=aStartPos; ; i++)
+	for(int i=aStartPos; i<aStartPos+Message::MaxKeySize ; i++)
 	{
 	//	fprintf(stderr, "%c%", aMsg[i]);
 		if(aMsg[i] == ':')
@@ -97,8 +96,6 @@ int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 			break;
 		}
 		keyBuffer[steps++] = aMsg[i];
-		if(steps > Message::MaxKeySize)
-			break;
 	};
 	//fprintf(stderr, "key %s", keyBuffer);
 	char type = aMsg[aStartPos+steps];
@@ -121,21 +118,21 @@ int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 
 	if(type == 'b')
 	{
-		bool b = translateBool(aMsg + (aStartPos+steps));
+		bool b = translateBool(aMsg[aStartPos + steps]);
 		steps++;
 		if(mCallbackBool && !cmd)
 			mCallbackBool(keyBuffer, b);
 	}
 	else if(type == 'i')
 	{
-		int i = translateInt(aMsg+(aStartPos+steps));
+		int i = translateInt(aMsg+(aStartPos + steps));
 		steps += 4;
 		if(mCallbackInt && !cmd)
 			mCallbackInt(keyBuffer, i);
 	}
 	else if(type == 'f')
 	{
-		float f = translateFloat(aMsg+(aStartPos+steps));
+		float f = translateFloat(aMsg+(aStartPos + steps));
 		steps += 4;
 		if(mCallbackFloat && !cmd)
 			mCallbackFloat(keyBuffer, f);
@@ -151,9 +148,9 @@ int MessageTranslationSenter::translateKeyValuePair(char *aMsg, int aStartPos)
 }
 
 
-bool MessageTranslationSenter::translateBool(char *aBool)
+bool MessageTranslationSenter::translateBool(char aBool)
 {
-	return (aBool[0] == '1') ? true : false;
+	return ((uint8_t) aBool == 1);
 }
 
 

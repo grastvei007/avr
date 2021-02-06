@@ -40,8 +40,8 @@ void setValue(char *aTagName, bool aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
-//	USART_buffer_append(msg.getMessagePtr(), size);
-    USART_putMessage(msg.getMessagePtr(), size);
+    //USART_putMessage(msg.getMessagePtr(), size);
+    USART_buffer_append(msg.getMessagePtr(), size);
     msg.destroy();
 }
 
@@ -54,8 +54,8 @@ void setValue(char *aTagName, int aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
-//	USART_buffer_append(msg.getMessagePtr(), size);
-    USART_putMessage(msg.getMessagePtr(), size);
+    //USART_putMessage(msg.getMessagePtr(), size);
+    USART_buffer_append(msg.getMessagePtr(), size);
     msg.destroy();
 }
 
@@ -68,8 +68,8 @@ void setValue(char *aTagName, float aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
-//	USART_buffer_append(msg.getMessagePtr(), size);
-    USART_putMessage(msg.getMessagePtr(), size);
+    //USART_putMessage(msg.getMessagePtr(), size);
+    USART_buffer_append(msg.getMessagePtr(), size);
     msg.destroy();
 }
 
@@ -82,8 +82,8 @@ void setValue(char *aTagName, char *aValue)
     msg.finnish();
     int size = msg.getSize() + 1;
 
-//	USART_buffer_append(msg.getMessagePtr(), size);
-    USART_putMessage(msg.getMessagePtr(), size);
+    //USART_putMessage(msg.getMessagePtr(), size);
+    USART_buffer_append(msg.getMessagePtr(), size);
     msg.destroy();
 }
 

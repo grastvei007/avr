@@ -218,7 +218,7 @@ void Message::calcCheckcode()
 
         n += (int)mMessage[i];
     }
-    r = n % 256;
+    r = n % 255;
     mMessage[mMessageSize-1] = (char)r;
 }
 
