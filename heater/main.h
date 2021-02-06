@@ -53,13 +53,13 @@ enum State
 };
 
 volatile State state = eInit;
-volatile State returnState = eRunning;
+volatile State nextState = eInit;
+volatile State returnState = eInit;
 volatile bool lock;
 volatile int tagNumber = 0;
 volatile int updateTags = 0;
 volatile bool on = false;
-volatile bool isTagsRequested = false;
-volatile int countDown = 10;
+volatile int counter = 0;
 volatile int adc0Value = 0;
 
 int numPrePumps = 250; // 25 pumps
@@ -69,6 +69,8 @@ volatile bool isBurning = false;
 void init(); ///< init fan, and effect.
 void initTimer();
 void turnGlowPlugOn(bool aOn);
+
+void writeStateTag();
 
 void messageCallback(Message *&msg);
 void requestDeviceName();

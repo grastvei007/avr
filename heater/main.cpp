@@ -4,8 +4,9 @@
 
 int main()
 {
-	_delay_ms(500);
 	lock = true;
+    init();
+
 	USART_init();
 	sei();
 //	cli();
@@ -43,8 +44,7 @@ int main()
 //	USART_init();
 	initTimer();
 	sei();
-	init();
-	lock = false;
+	//lock = false;
 	while(true)
 	{
 
@@ -76,7 +76,7 @@ void onBoolValueChanged(char *aKey, bool aValue)
 {
 	if(strcmp(aKey, "on") == 0)
 	{
-		on = !aValue;
+		on = aValue;
 	}
 	else if(strcmp(aKey, "burning") == 0)
 	{
@@ -119,13 +119,41 @@ ISR(USART_RX_vect)
 	mh.insertChar(c);
 }
 
+/**
+ * CS12    CS11    CS10      Prescaler
+  0       0       0       Timer off/no clock source
+  0       0       1       1:1 prescaler/this is the same as not having prescaler
+  0       1       0       1:8 prescaler
+  0       1       1       1:64 prescaler
+  1       0       0       1:256 prescaler
+  1       0       1       1:1024 prescaler
 
+Timer resolution = (Prescaler / Input frequency)
+Prescaler values can be  1, 8, 64, 256 or 1024
+And the input frequency is 12Mhz.
+
+Prescaler valuer | Timer resolution 16MHz       | Timer resolution 12 MHz
+1                | 0,0000000625s = 62,5 nS      | 0.000000083333 = 83.33ns
+8                | 0,0000005s = 0,5uS           | 0.00000066667  = 0.6667 us
+64               | 0,000004s = 4uS              | 0.0000053333   = 5.3333 us
+256              | 0,000016s = 16us             | 0.000021333    = 21.333 us
+1024             | 0,000064s = 64uS             | 0.000085333    = 85.333 us
+
+ I want 50Hz then:
+ 50 Hz target delay 20ms
+
+ prescale   |   value 12Mhz
+ 1          | 240000.96
+ 8          | 29999.85
+ 64         | 3750
+ 256        | 937.51
+ 1024       | 234.38
+ */
 void initTimer()
 {
-    OCR1A = F_CPU / 256 / 10; // 10 Hz
-    TCCR1B |= 1 << WGM12;
-    TCCR1B |= 1 << CS12;
-    TIMSK1 |= 1 << OCIE1A;
+    TCCR1B = (1 << WGM12) | (1<<CS11) | (1<<CS10); // CTC mode and presale 64
+    OCR1A = 3750;
+    TIMSK1 = 1 << OCIE1A; // enable interrupt
 }
 
 
@@ -139,8 +167,8 @@ void requestCreateTags()
 {
 	returnState = state;
 	tagNumber = 0;
-	state = eSendTags;
-	isTagsRequested = true;
+	nextState = eSendTags;
+	lock = false;
 }
 
 
@@ -163,51 +191,53 @@ void init()
 	effect.pwmMax = 255;
 }
 
-
+/**
+ * Interrupt is called 50 times a second.
+ */
 ISR(TIMER1_COMPA_vect)
 {
-	if(countDown > 0)
-	{
-		countDown--;
-		return;
-	}
-	
-	if(lock)
-		return;
-	lock = true;
-	// run loop
-	
-	mh.run(); // run message handler
+    USART_buffer_send();
 
-	pump.update(0.1);
+    counter++;
+    if(counter < 10)
+        return;
+    else
+        counter = 0;
+	// run loop
+	mh.run(); // run message handler
+    if(lock)
+        return;
+
+    pump.update(0.1);
+
+	if(nextState != state)
+    {
+	    state = nextState;
+	    writeStateTag();
+    }
 
 	if(state == eInit)
 	{
-	//	Tag::setValue("state", "init");
 		numPrePumps--;
 		if(numPrePumps <= 0)
 		{
-//			pump.start();
 //			pump.setSpeed(255);
-//			Tag::setValue("on", false);
-//			Tag::setValue("burning", false);
-			isBurning = false;
-			on = false;
-			state = eStarting;
+			Tag::setValue("on", false);
+			Tag::setValue("burning", false);
+			//isBurning = false;
+			//on = false;
 			pwm.setDutyCycle(Pwm::eChanPd3, 250);
 			effect.currentLevel = 9;
 			effect.newLevel = 9;
 			turnGlowPlugOn(true);
-		//	Tag::setValue("state", "starting");
+			nextState = eStarting;
 		}
 	}
 	else if(state == eStarting)
 	{
-
 		if(isBurning)
 		{
-			state = eRunning;
-	//		Tag::setValue("on", true);
+			//Tag::setValue("on", true);
 			on = true;
 			effect.currentLevel = 6;
 			effect.newLevel = 6;
@@ -216,7 +246,9 @@ ISR(TIMER1_COMPA_vect)
 			fan.newLevel = 6;
 			fan.changed = true;
 			turnGlowPlugOn(false);
-		//	Tag::setValue("state", "running");
+            Tag::setValue("statusFan", fan.currentLevel);
+            Tag::setValue("statusHeat", effect.currentLevel);
+			nextState = eRunning;
 		}
 
 	}
@@ -231,7 +263,7 @@ ISR(TIMER1_COMPA_vect)
                     pwmValue = 255;
             pwm.setDutyCycle(Pwm::eChanPb3, pwmValue);;
             fan.changed = false;
-    //		Tag::setValue("statusFan", fan.currentLevel);
+    		Tag::setValue("statusFan", fan.currentLevel);
         }
         if(effect.changed)
         {
@@ -245,13 +277,12 @@ ISR(TIMER1_COMPA_vect)
             pwm.setDutyCycle(Pwm::eChanPd3, pwmValue);
             effect.changed = false;
             pump.setSpeed(25*effect.currentLevel);
-    //		Tag::setValue("statusHeat", effect.currentLevel);
+    		Tag::setValue("statusHeat", effect.currentLevel);
         }
 		if(!on)
 		{
 			pump.stop();
-			state = eStopping;
-			Tag::setValue("state", "Stopping");
+			nextState = eStopping;
 		}
 	}
 	else if(state == eStopping)
@@ -260,8 +291,7 @@ ISR(TIMER1_COMPA_vect)
 		{
 			pwm.setDutyCycle(Pwm::eChanPb3, 0);
 			pwm.setDutyCycle(Pwm::eChanPd3, 0);
-			state = eStopped;
-			Tag::setValue("state", "Stopped");
+			nextState = eStopped;
 		}
 	}
 	else if(state == eStopped)
@@ -272,27 +302,24 @@ ISR(TIMER1_COMPA_vect)
 	{
 		if(tagNumber == 0)
 		    Tag::createTag("burning", false);
-		else if(tagNumber == 1)
-		    Tag::createTag("fanLevel", fan.currentLevel);
 		else if(tagNumber == 2)
-	    	Tag::createTag("effectLevel", effect.currentLevel);
-		else if(tagNumber == 3)
-		    Tag::createTag("on", false);
+		    Tag::createTag("fanLevel", fan.currentLevel);
 		else if(tagNumber == 4)
-			Tag::createTag("state", "init");
-		else if(tagNumber == 5)
-			Tag::createTag("adc0", adc0Value);
+	    	Tag::createTag("effectLevel", effect.currentLevel);
 		else if(tagNumber == 6)
+		    Tag::createTag("on", false);
+		else if(tagNumber == 8)
+			Tag::createTag("state", "init");
+		else if(tagNumber == 10)
+			Tag::createTag("adc0", adc0Value);
+		else if(tagNumber == 12)
 			Tag::createTag("statusHeat", effect.currentLevel);
-		else if(tagNumber == 7)
+		else if(tagNumber == 14)
 			Tag::createTag("statusFan", fan.currentLevel);
-		else
-			state = returnState;
+		else if(tagNumber > 16)
+			nextState = returnState;
 		tagNumber++;
 	}
-
-	USART_buffer_send(); // send one char from the buffer
-	lock = false;
 }
 
 
@@ -305,3 +332,31 @@ ISR(TIMER1_COMPA_vect)
 
 }
 */
+
+void writeStateTag()
+{
+    switch (state)
+    {
+        case eInit:
+            Tag::setValue("state", "init");
+            break;
+        case eStarting:
+            Tag::setValue("state", "starting");
+            break;
+        case eRunning:
+            Tag::setValue("state", "running");
+            break;
+        case eStopping:
+            Tag::setValue("state", "stopping");
+            break;
+        case eStopped:
+            Tag::setValue("state", "stopped");
+            break;
+        case eSendTags:
+            Tag::setValue("state", "sendTag");
+            break;
+        default:
+            Tag::setValue("state", "unknown");
+            break;
+    }
+}
