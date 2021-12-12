@@ -1,77 +1,68 @@
-#include "../messagehandler.h"
-#include "../message.h"
-#include "../messagetranslationsenter.h"
+#include "../circularbuffer.h"
 
 #include <iostream>
 #include <string>
 
-MessageTranslationSenter mts;
 
+bool circularbufferTests();
+void printBuffer(CircularBuffer *buffer);
 
-void callback(Message *&aMsg)
-{
-	std::cout << "Callback ";
-	aMsg->print();
-	mts.translateMessage(aMsg);
-//	aMsg.destroy();
-}
-
-void name()
-{
-	std::cout << std::endl << "name func" << std::endl;
-}
-
-void keyValueFloat(unsigned char *key, float val)
-{
-	std::cout << key << " - " << val << std::endl; 
-}
 
 int main(int argc, char *argv[])
 {
-	mts.init();
-	mts.setCallbackFloatValue(keyValueFloat);
-	mts.setDeviceNameFunc(name);
 
-	MessageHandler *msg = new MessageHandler(30);
-	msg->setCallback(callback);
-	for(int i=0; i< 55; ++i)
-	{
-//		msg->printBuffer();
-		msg->insertChar(77+i);
-
-//		std::cout << "    " << msg->size()  <<  "\n";
-	}
-	std::cout << "\n";
-
-
-	msg->insertChar('m');
-	msg->insertChar('s');
-	msg->insertChar('g');
-
-
-	msg->printBuffer();
-	std::cout << std::endl;
-
-//	int pos = msg->find("msg");
-//	std::cout << pos << std::endl;
-
-//	std::string str = "<msg0019key:f33SAn>";
-    std::string str = "<msg0024deviceName:c00u>";
-	for(int i=0; i<str.size(); ++i)
-	{
-		msg->insertChar(str.at(i));
-	}
-	msg->printBuffer();
-	std::cout << std::endl;
-//	msg->find("<msg");
-/*	Message msg2;
-	msg2.init();
-	float val = 13.2;
-	msg2.add("key", val);
-	msg2.finnish();
-	unsigned char *m;
-	msg2.getMessage(m);
-	std::cout << m << std::endl;*/
+    if(!circularbufferTests())
+        std::cerr << "circular buffer tests failed" << std::endl;
+    else
+        std::cerr << "circular buffer tests passed" << std::endl;
 
 	return 0;
+}
+
+
+bool circularbufferTests()
+{
+    CircularBuffer buffer = buffer_create();
+//    printBuffer(&buffer);
+
+    int pos = 0;
+    for(int i=0; i<BUFFER_SIZE+10; ++i)
+    {
+        std::cerr << pos << " ";
+        pos = buffer_next_pos(pos);
+    }
+    std::cerr << std::endl;
+
+    for(int i=0; i<29; ++i)
+        buffer_write(&buffer, char(i));
+
+    buffer_write(&buffer, '<');
+    buffer_write(&buffer, 'm');
+    buffer_write(&buffer, 's');
+    buffer_write(&buffer, 'g');
+
+    int found = buffer_find(&buffer, "<msg", 1);
+    if(found)
+        std::cerr << "found: " << found << std::endl;
+    else
+        std::cerr << "not found" << std::endl;
+
+    std::cerr << "find pos: " << (int)buffer_find(&buffer, "<msg", 100) << std::endl;
+    std::cerr << "find pos: " << (int)buffer_find(&buffer, "<msg", 31) << std::endl;
+
+    buffer_erase(&buffer, found, 4);
+
+//   printBuffer(&buffer);
+
+    return true;
+}
+
+
+void printBuffer(CircularBuffer *buffer)
+{
+    for(int i=0; i<BUFFER_SIZE; ++i)
+    {
+        std::cerr << "[" << i << "," << (int)buffer_read_pos(buffer, i) << "] "; 
+    }
+    std::cerr << std::endl;
 }
