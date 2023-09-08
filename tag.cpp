@@ -3,88 +3,63 @@
 #include <stdlib.h>
 
 #include "message.h"
-#include "usart.h"
 
-namespace Tag
+namespace tag
 {
 
-void createTag(char *aName, bool aValue)
+void createTag(const char *device, char *aName, bool aValue)
 {
-	setValue(aName, aValue);
+    setValue(device, aName, aValue);
 }
 
 
-void createTag(char *aName, int aValue)
+void createTag(const char *device, char *aName, int aValue)
 {
-	setValue(aName, aValue);
+    setValue(device, aName, aValue);
 }
 
 
-void createTag(char *aName, float aValue)
+void createTag(const char *device, char *aName, float aValue)
 {
-	setValue(aName, aValue);
+    setValue(device, aName, aValue);
 }
 
 
-void createTag(char *aName, char *aValue)
+void createTag(const char *device, char *aName, char *aValue)
 {
-	setValue(aName, aValue);
+    setValue(device, aName, aValue);
 }
 
 
-void setValue(char *aTagName, bool aValue)
+void setValue(const char *device, char *tagName, bool value)
 {
-    Message msg;
-    msg.init();
-    msg.add(aTagName, aValue);
-    msg.finnish();
-    int size = msg.getSize() + 1;
-
-    //USART_putMessage(msg.getMessagePtr(), size);
-    USART_buffer_append(msg.getMessagePtr(), size);
-    msg.destroy();
+    message::reset_message(&tagMessageBuffer , device);
+    message::add(&tagMessageBuffer, tagName, value);
+    message::finnish_message(&tagMessageBuffer);
 }
 
 
-void setValue(char *aTagName, int aValue)
+void setValue(const char *device, char *tagName, int value)
 {
-    Message msg;
-    msg.init();
-    msg.add(aTagName, aValue);
-    msg.finnish();
-    int size = msg.getSize() + 1;
-
-    //USART_putMessage(msg.getMessagePtr(), size);
-    USART_buffer_append(msg.getMessagePtr(), size);
-    msg.destroy();
+    message::reset_message(&tagMessageBuffer , device);
+    message::add(&tagMessageBuffer, tagName, value);
+    message::finnish_message(&tagMessageBuffer);
 }
 
 
-void setValue(char *aTagName, float aValue)
+void setValue(const char *device, char *tagName, float value)
 {
-    Message msg;
-    msg.init();
-    msg.add(aTagName, aValue);
-    msg.finnish();
-    int size = msg.getSize() + 1;
-
-    //USART_putMessage(msg.getMessagePtr(), size);
-    USART_buffer_append(msg.getMessagePtr(), size);
-    msg.destroy();
+    message::reset_message(&tagMessageBuffer , device);
+    message::add(&tagMessageBuffer, tagName, value);
+    message::finnish_message(&tagMessageBuffer);
 }
 
 
-void setValue(char *aTagName, char *aValue)
+void setValue(const char *device, char *tagName, char *value)
 {
-    Message msg;
-    msg.init();
-    msg.add(aTagName, aValue);
-    msg.finnish();
-    int size = msg.getSize() + 1;
-
-    //USART_putMessage(msg.getMessagePtr(), size);
-    USART_buffer_append(msg.getMessagePtr(), size);
-    msg.destroy();
+    message::reset_message(&tagMessageBuffer , device);
+    message::add(&tagMessageBuffer, tagName, value);
+    message::finnish_message(&tagMessageBuffer);
 }
 
 }
