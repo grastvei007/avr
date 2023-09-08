@@ -17,70 +17,46 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #define MESSAGE_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 /**
  * @brief The Message class
  *
+ * <msg:devicename:size|name:type<value>|checksum|>
  *
- * The message starts with <msg and ends with r> where r is a control byte.
- * the sum of all bytes in the message modulo 256 = r.
- * after <msg is 4 bytes that describes the size of the message, it is an int in
- * plain text.
+ * 	size - 		uint8
+ *	type - 		c<size> string
+ *		   		f float
+ *		   		i int
+ *		   		b bool
+ *	checksum -	uint8
  *
+ *	sum of every byte equal 0
  */
-class Message
+
+const int MAX_SIZE = 100;
+
+struct Message
 {
-public:
-    Message();
-    Message(const char *aMsg, size_t aSize);
-
-	static const int HeaderSize = 4;
-	static const int MaxKeySize = 20;
-
-	void init();
-	void destroy(); ///< free message buffer.
-
-    /**
-     * @brief isValid
-     *
-     * error codes:
-     *   1 - all good
-     *  -1 - error length
-     *  -2 - error in header
-     *  -3 - checksum error
-     *
-     *
-     * @return int an error code
-     */
-    int isValid();
-
-    void add(const char* aKey, double aValue);
-    void add(const char *aKey, float aValue);
-    void add(const char* aKey, int aValue);
-	void add(const char* aKey, bool aValue);
-	void add(const char* aKey, const char *aValue);
-
-    void finnish(); ///< prepare meassege to be transmited.
-
-    int getSize();
-    void getMessageData(char *msg);
-	char* getMessagePtr();
-
-    int getMessage( char *&rMessage); ///< get the message
-	/** brief Direct set the message buffer,
-		@warning replaces existing message if it exist.
-	**/
-    void setMessage(char *aMsg, size_t aMessageSize);
-	void print();
-private:
-    void calcCheckcode();
-    int validateMessage(const char *aMsg, size_t aSize);
-
-private:
-    char mMessage[100];
-    size_t mMessageSize;
-    int mIsValid;
-
+	uint8_t size;
+	uint8_t size_location;
+	uint8_t buffer[MAX_SIZE];
 };
+
+namespace message
+{
+	void reset_message(Message *msg, const char* device);
+    void finnish_message(Message *msg);
+
+
+    bool isValid(Message *msg);
+
+//    void add(Message *msg, const char* aKey, double aValue);
+    void add(Message *msg, const char *aKey, float aValue);
+    void add(Message *msg, const char* aKey, int aValue);
+	void add(Message *msg, const char* aKey, bool aValue);
+    void add(Message *msg, const char* aKey, const char *aValue);
+}
+
 
 #endif // MESSAGE_H
