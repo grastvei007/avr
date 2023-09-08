@@ -1,68 +1,80 @@
-#include "../circularbuffer.h"
-
 #include <iostream>
 #include <string>
 
+#include "../message.h"
 
-bool circularbufferTests();
-void printBuffer(CircularBuffer *buffer);
+
+Message msg;
+
+void print_message(Message *msg);
+bool isValid(Message *msg);
+
+void test_valid()
+{
+    message::reset_message(&msg, "sensor");
+    message::finnish_message(&msg);
+
+    if(isValid(&msg))
+        std::cout << "Valid message" << std::endl;
+    else
+        std::cout << "Message is not valid!" << std::endl;
+    print_message(&msg);
+}
+
+void test_double_message()
+{
+    std::cout << "Test float message" << std::endl;
+    float value = 10.5;
+
+    message::reset_message(&msg, "doubleSensor");
+    message::add(&msg, "temp", value);
+
+    message::finnish_message(&msg);
+
+    if(isValid(&msg))
+        std::cout << "Valid message" << std::endl;
+    else
+        std::cout << "Message is not valid!" << std::endl;
+    print_message(&msg);
+
+}
 
 
 int main(int argc, char *argv[])
 {
+    test_valid();
 
-    if(!circularbufferTests())
-        std::cerr << "circular buffer tests failed" << std::endl;
-    else
-        std::cerr << "circular buffer tests passed" << std::endl;
-
-	return 0;
+    test_double_message();
 }
 
 
-bool circularbufferTests()
+
+
+void print_message(Message *msg)
 {
-    CircularBuffer buffer = buffer_create();
-//    printBuffer(&buffer);
-
-    int pos = 0;
-    for(int i=0; i<BUFFER_SIZE+10; ++i)
-    {
-        std::cerr << pos << " ";
-        pos = buffer_next_pos(pos);
-    }
-    std::cerr << std::endl;
-
-    for(int i=0; i<29; ++i)
-        buffer_write(&buffer, char(i));
-
-    buffer_write(&buffer, '<');
-    buffer_write(&buffer, 'm');
-    buffer_write(&buffer, 's');
-    buffer_write(&buffer, 'g');
-
-    int found = buffer_find(&buffer, "<msg", 1);
-    if(found)
-        std::cerr << "found: " << found << std::endl;
-    else
-        std::cerr << "not found" << std::endl;
-
-    std::cerr << "find pos: " << (int)buffer_find(&buffer, "<msg", 100) << std::endl;
-    std::cerr << "find pos: " << (int)buffer_find(&buffer, "<msg", 31) << std::endl;
-
-    buffer_erase(&buffer, found, 4);
-
-//   printBuffer(&buffer);
-
-    return true;
+	std::cout << "Message:" << std::endl;
+	std::cout << "size: " << (int)msg->size << std::endl;;
+	std::cout << "size_location: " << (int)msg->size_location << std::endl;
+	std::cout << "[";
+	for(int i=0; i<=msg->size; ++i)
+	{
+		if( i == 0)
+			std::cout << msg->buffer[i];
+		else if(i == msg->size_location)
+			std::cout << "(" << (int)msg->buffer[i] << ")";
+		else if(i == msg->size-1)
+			std::cout << "(" << (int)msg->buffer[i] << ")";
+		else
+			std::cout << msg->buffer[i];
+	}
+	std::cout << "]" <<  std::endl;
 }
 
-
-void printBuffer(CircularBuffer *buffer)
+bool isValid(Message *msg)
 {
-    for(int i=0; i<BUFFER_SIZE; ++i)
-    {
-        std::cerr << "[" << i << "," << (int)buffer_read_pos(buffer, i) << "] "; 
-    }
-    std::cerr << std::endl;
+	int sum = 0;
+	for(int i=0; i <= msg->size; ++i)
+		sum += msg->buffer[i];
+
+	return sum % 256;
 }
