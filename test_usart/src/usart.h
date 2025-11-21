@@ -46,7 +46,7 @@ extern USART_BUFFER usart_tx_buffer;
 
 void usart_init(unsigned int baud);
 void usart_transmit(uint8_t data);
-void usart_transmit_bytes(char data[], unsigned int size);
+void usart_transmit_bytes(unsigned char data[], unsigned int size);
 void usart_transmit_string(char *data);
 
 void usart_put_char_in_buffer(unsigned char c);

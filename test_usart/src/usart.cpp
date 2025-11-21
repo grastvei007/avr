@@ -41,11 +41,13 @@ void usart_transmit(uint8_t data)
 //    UDR0 = data;
 }
 
-void usart_transmit_bytes(char bytes[], unsigned int size)
+void usart_transmit_bytes(unsigned char bytes[], unsigned int size)
 {
+    unsigned char c;
     for(unsigned int i=0; i < size; ++i)
     {
-        usart_transmit(bytes[i]);
+        c = bytes[i];
+        usart_transmit(c);
     }
 }
 
@@ -82,19 +84,19 @@ void usart_init(unsigned int baud)
 //    USART0_STATUS = (1 << UCSZ01) | (1 << UCSZ00);
 
     // enable transmit and receive
-    UCSR0B |= (1 << TXEN0) | (1 << RXCIE0);
-
     UCSR0B |= (1 << RXEN0) | (1 << TXEN0);
+
+    UCSR0B |= (1 << RXCIE0);
 
     UCSR0C |= (1 << UCSZ01) | (1 << UCSZ00);
      
     // enable global interupt
-    sei();
+//    sei();
 }
 
 void usart_put_char_in_buffer(unsigned char c)
 {
-    unsigned int i = (unsigned int)(usart_rx_buffer.head + 1) & USART_BUFFER_SIZE;
+    unsigned int i = (unsigned int)(usart_rx_buffer.head + 1) % USART_BUFFER_SIZE;
 
     if(i != usart_rx_buffer.tail)
     {

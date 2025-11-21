@@ -23,6 +23,7 @@ CLK = 12000000
 # avr programmer (and port if necessary)
 # e.g. PRG = usbtiny -or- PRG = arduino -P /dev/tty.usbmodem411
 PRG = usbtiny
+PRG_MCU = m328p
 # fuse values for avr: low, high, and extended
 # these values are from an Arduino Uno (ATMega328P)
 # see http://www.engbedded.com/fusecalc/ for other MCUs and options
@@ -30,10 +31,10 @@ LFU = 0xFF
 HFU = 0xDE
 EFU = 0x05
 # program source files (not including external libraries)
-SRC = $(PRJ).cpp usart.cpp messagehandler.cpp
+SRC = $(PRJ).cpp #usart.cpp messagehandler.cpp tag.cpp
 # where to look for external libraries (consisting of .c/.cpp files and .h files)
 # e.g. EXT = ../../EyeToSee ../../YouSART
-EXT = usart util
+EXT = src
 
 
 #################################################################################################
@@ -48,7 +49,7 @@ CFLAGS    = -Wall -Os -DF_CPU=$(CLK) -mmcu=$(MCU) $(INCLUDE)
 CPPFLAGS =
 
 # executables
-AVRDUDE = avrdude -c $(PRG) -p $(MCU)
+AVRDUDE = avrdude -c $(PRG) -p $(PRG_MCU) -B1
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
 SIZE    = avr-size --format=avr --mcu=$(MCU)
@@ -71,7 +72,7 @@ test:
 
 # flash program to mcu
 flash: all
-	$(AVRDUDE) -U flash:w:$(PRJ).hex:i
+	$(AVRDUDE) -U $(PRJ).hex  #flash:w:$(PRJ).hex:i
 
 # write fuses to mcu
 fuse:
