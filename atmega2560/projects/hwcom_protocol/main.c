@@ -27,6 +27,14 @@ TaskHandle_t sendDeviceNameTaskHandle = NULL;
 
 volatile uint8_t rx_name[RX_NAME_SIZE];
 
+enum valueTypes
+{
+    eFloat = 1,
+    eInt = 2,
+    eBool = 3,
+    eString = 4
+};
+
 typedef enum rx_states_
 {
     idle,
@@ -41,6 +49,11 @@ void vTaskSendDeviceName(void *pvParameters);
 void vTaskRx(void *pvParameters);
 void vTaskNameValueRecieved(void *pvParameters);
 
+
+typedef union{
+    float f;
+    uint8_t bytes[4];
+}float_bytes;
 
 
 ISR(ADC_vect)
@@ -87,17 +100,21 @@ int main( void )
 void taskAnalogRead(void *pvParameters)
 {
     uint16_t adcValue;
-    char buffer[10];
+    char buffer[11] = "<adc:1xxxx>";
+    float_bytes fb;
     for(;;)
     {
         ADCSRA |= (1 << ADSC);
         
         if(xQueueReceive(adcQueue, &adcValue, pdMS_TO_TICKS(100)) == pdTRUE)
         {
-            int value = adcValue;
-            itoa(value, buffer, 10);
+            fb.f = (float)adcValue * 5 / 1023.0f; // Scale to 0-5V
+            buffer[6] = fb.bytes[0];
+            buffer[7] = fb.bytes[1];
+            buffer[8] = fb.bytes[2];
+            buffer[9] = fb.bytes[3];
+            
             vUART0_SendString(buffer);
-            vUART0_SendString("\r\n");
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));
