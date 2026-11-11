@@ -49,6 +49,9 @@
 #define DS18B20_RESOLUTION_11_BIT  0x5F  /* 11-bit, ~750ms conversion */
 #define DS18B20_RESOLUTION_12_BIT  0x7F  /* 12-bit, ~1500ms conversion */
 
+
+void delay_usec(int);
+
 /* Function Prototypes */
 
 /**

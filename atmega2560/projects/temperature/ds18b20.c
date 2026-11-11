@@ -36,23 +36,11 @@
 #define DS18B20_READ_SAMPLE_US    15
 
 /* 
- * Microsecond delay function using timer0
  * This provides precise microsecond delays without blocking FreeRTOS scheduler
  */
 static void ds18b20_delay_us(uint16_t us)
 {
-    /* Use busy-wait loop for precise timing */
-    /* At 16MHz, each loop iteration takes ~4 cycles = 0.25μs */
-    /* We need approximately us * 4 iterations for 16MHz */
-    
-    volatile uint16_t count = us * 4;
-    
-    while(count > 0)
-    {
-        count--;
-        /* Compiler barrier to prevent optimization */
-        asm volatile("" ::: "memory");
-    }
+    delay_usec(us-1);
 }
 
 /**
