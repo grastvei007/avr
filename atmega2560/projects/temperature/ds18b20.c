@@ -59,8 +59,6 @@ static inline void ds18b20_set_output(void)
 static inline void ds18b20_set_input(void)
 {
     DS18B20_DDR &= ~(1 << DS18B20_PIN);
-    /* Disable pull-up for clean presence pulse detection */
-//    DS18B20_PORT &= ~(1 << DS18B20_PIN);
 }
 
 /**
@@ -69,8 +67,6 @@ static inline void ds18b20_set_input(void)
 static inline void ds18b20_set_input_pullup(void)
 {
     DS18B20_DDR &= ~(1 << DS18B20_PIN);
-    /* Enable pull-up for defined logic level */
-   // DS18B20_PORT |= (1 << DS18B20_PIN);
 }
 
 /**
@@ -96,7 +92,6 @@ static inline void ds18b20_set_low(void)
 static inline uint8_t ds18b20_read_pin(void)
 {
     /* Reading PINx register gives actual pin state even when configured as input */
-//    return (DS18B20_PIN_REG & (1 << (DS18B20_PIN & 0x07))) ? 1 : 0;
     return (DS18B20_PIN_REG & (1 << DS18B20_PIN)) ? 1 : 0;
 }
 
@@ -119,6 +114,8 @@ int8_t ds18b20_reset(void)
     ds18b20_set_output();
     ds18b20_set_low();
     ds18b20_delay_us(DS18B20_RST_LOW_US);
+
+    ds18b20_set_high();
     
     /* Release bus and set as input (no pull-up) to sample presence pulse */
     ds18b20_set_input();
@@ -130,8 +127,6 @@ int8_t ds18b20_reset(void)
     /* Wait for reset recovery time */
     ds18b20_delay_us(DS18B20_RST_RECOVERY_US);
     
-    /* Re-enable pull-up for noise immunity after reset sequence */
-//    ds18b20_set_input_pullup();
     
     /* Return negative error code for no device, positive for success */
     return presence == 0 ? DS18B20_SUCCESS : DS18B20_ERROR_NO_DEVICE;
