@@ -28,8 +28,8 @@
 #define DS18B20_WRITE_0_SAMPLE_US 10
 
 /* Write 1: master sends low for ~15μs, then releases */
-#define DS18B20_WRITE_1_LOW_US    15
-#define DS18B20_WRITE_1_SAMPLE_US 10
+#define DS18B20_WRITE_1_LOW_US    5     //15
+#define DS18B20_WRITE_1_SAMPLE_US 55    // 10
 
 /* Read slot: master releases bus, samples after ~15μs */
 #define DS18B20_READ_SLOT_US      60
@@ -139,32 +139,24 @@ void ds18b20_write_byte(uint8_t byte)
     
     for(i = 0; i < 8; i++)
     {
-        bit = byte & 0x01;
+        bit = byte >> i;
+        bit &= 0x01;
+
+        // pull low
+        ds18b20_set_output();
+        ds18b20_set_low();
         
         if(bit)
         {
-            /* Write 1: pull low for short time, then release */
-            ds18b20_set_output();
-            ds18b20_set_low();
-            ds18b20_delay_us(DS18B20_WRITE_1_LOW_US);
-            ds18b20_set_input();
-            ds18b20_delay_us(DS18B20_WRITE_1_SAMPLE_US);
+            ds18b20_set_high();
         }
-        else
-        {
-            /* Write 0: pull low for full slot time */
-            ds18b20_set_output();
-            ds18b20_set_low();
-            ds18b20_delay_us(DS18B20_WRITE_0_LOW_US);
-            ds18b20_delay_us(DS18B20_WRITE_0_SAMPLE_US);
-            ds18b20_set_input();
-        }
-        
-        /* Slot recovery time */
-        ds18b20_delay_us(2);
-        
-        byte >>= 1;
+
+        ds18b20_delay_us(DS18B20_WRITE_0_LOW_US);
+
+        ds18b20_set_high();
+        ds18b20_set_input();        
     }
+    ds18b20_delay_us(120);
 }
 
 uint8_t ds18b20_read_byte(void)
@@ -177,7 +169,8 @@ uint8_t ds18b20_read_byte(void)
         /* Start read slot: pull low briefly */
         ds18b20_set_output();
         ds18b20_set_low();
-        ds18b20_delay_us(6);
+
+        ds18b20_set_high();
         
         /* Release bus and sample */
         ds18b20_set_input();
@@ -189,8 +182,8 @@ uint8_t ds18b20_read_byte(void)
             byte |= (1 << i);
         }
         
-        /* Complete the time slot */
-        ds18b20_delay_us(DS18B20_READ_SLOT_US - DS18B20_READ_SAMPLE_US - 6);
+        /* Complete the time slot, and add a recovery time */
+        ds18b20_delay_us(DS18B20_READ_SLOT_US - DS18B20_READ_SAMPLE_US - 6 + 2);
     }
     
     return byte;
@@ -308,7 +301,8 @@ int8_t ds18b20_read_temperature_blocking(float *temperature, uint16_t conversion
     }
     
     /* Wait for conversion to complete */
-    start_time = xTaskGetTickCount();
+    //start_time = xTaskGetTickCount();
+    ds18b20_delay_us(120);
     
     while(1)
     {
