@@ -226,12 +226,12 @@ void vTaskReadTemperature(void *pvParameters)
         }
         else
         {
-            int8_t errorBuffer[13] = "<error:5_>";
+            int8_t errorBuffer[10] = "<error:5_>";
             errorBuffer[8] = read;
-            vUART0_SendString_n(errorBuffer, 13);
+            vUART0_SendString_n(errorBuffer, 10);
         }
         
-        /* Wait 1 second between readings */
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        /* Wait 10 second between readings */
+        vTaskDelay(pdMS_TO_TICKS(10000));
     }
 }
