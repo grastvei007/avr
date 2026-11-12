@@ -35,7 +35,7 @@
 #define DS18B20_ERROR_COPY_SCRATCHPAD         -8  /* Failed to copy scratchpad to EEPROM */
 
 /* DS18B20 Commands */
-#define DS18B20_CMD_SKIP_ROM              0x0C
+#define DS18B20_CMD_SKIP_ROM              0xCC
 #define DS18B20_CMD_READ_SCRATCHPAD       0xBE
 #define DS18B20_CMD_WRITE_SCRATCHPAD      0x4E
 #define DS18B20_CMD_CONVERT_TEMP          0x44
