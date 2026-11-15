@@ -301,7 +301,7 @@ int8_t ds18b20_read_temperature_blocking(float *temperature, uint16_t conversion
     }
     
     /* Wait for conversion to complete */
-    //start_time = xTaskGetTickCount();
+    start_time = xTaskGetTickCount();
     ds18b20_delay_us(120);
     
     while(1)
